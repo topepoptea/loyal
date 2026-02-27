@@ -222,7 +222,7 @@
 <div class="toast" id="toast"></div>
 
 <script>
-const SCRIPT_URL   = "https://script.google.com/macros/s/AKfycbxRJ0-SNf44bPCSbDqRV3SDYe-eP-ienuk1RGZPkvGU1OCJmmRAelW_8vhiRozxQ_kSOA/exec";
+const SCRIPT_URL   = "YOUR_APPS_SCRIPT_URL_HERE";
 const STAMPS       = 10;
 const DEFAULT_GURL = "https://g.page/r/YOUR_TOPEPOP_REVIEW_LINK";
 const REMEMBER_KEY = 'topepopRememberMe';
@@ -290,8 +290,15 @@ function maybeRemember(phone, name) {
 
 /* ══ API ══ */
 async function api(action, data = {}) {
-  if (SCRIPT_URL === 'YOUR_APPS_SCRIPT_URL_HERE') throw new Error('No URL');
-  const res = await fetch(SCRIPT_URL, { method:'POST', body: JSON.stringify({ action, ...data }) });
+  if (SCRIPT_URL === 'https://script.google.com/macros/s/AKfycbxRJ0-SNf44bPCSbDqRV3SDYe-eP-ienuk1RGZPkvGU1OCJmmRAelW_8vhiRozxQ_kSOA/exec') throw new Error('No URL');
+  // Apps Script requires redirect following + specific content type
+  const res = await fetch(SCRIPT_URL, {
+    method:   'POST',
+    redirect: 'follow',
+    headers:  { 'Content-Type': 'text/plain' }, // Apps Script accepts text/plain for POST
+    body:     JSON.stringify({ action, ...data })
+  });
+  if (!res.ok) throw new Error('HTTP ' + res.status);
   return res.json();
 }
 
@@ -302,7 +309,11 @@ async function checkOnline() {
   if (onlineChecked) return isOnline;
   try {
     const r = await Promise.race([
-      fetch(SCRIPT_URL, { method:'POST', body: JSON.stringify({ action:'getMember', phone:'__ping__' }) }),
+      fetch(SCRIPT_URL, {
+        method:'POST', redirect:'follow',
+        headers:{'Content-Type':'text/plain'},
+        body: JSON.stringify({ action:'ping' })
+      }),
       new Promise((_,rej) => setTimeout(() => rej(), 5000))
     ]);
     isOnline = r.ok;
