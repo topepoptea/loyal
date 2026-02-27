@@ -295,16 +295,20 @@ async function api(action, data = {}) {
   return res.json();
 }
 
+// Only pings once per session — no repeated round-trips
+let onlineChecked = false;
 async function checkOnline() {
   if (SCRIPT_URL === 'YOUR_APPS_SCRIPT_URL_HERE') { setSyncStatus('offline','Local mode'); return false; }
+  if (onlineChecked) return isOnline;
   try {
     const r = await Promise.race([
-      fetch(SCRIPT_URL, { method:'POST', body: JSON.stringify({ action:'getAll' }) }),
-      new Promise((_,rej) => setTimeout(() => rej(), 4000))
+      fetch(SCRIPT_URL, { method:'POST', body: JSON.stringify({ action:'getMember', phone:'__ping__' }) }),
+      new Promise((_,rej) => setTimeout(() => rej(), 5000))
     ]);
     isOnline = r.ok;
   } catch { isOnline = false; }
-  setSyncStatus(isOnline ? 'online' : 'offline', isOnline ? 'Synced ✓' : 'Offline');
+  onlineChecked = true;
+  setSyncStatus(isOnline ? 'online' : 'offline', isOnline ? 'Connected ✓' : 'Offline');
   document.getElementById('offline-notice').style.display = isOnline ? 'none' : 'block';
   return isOnline;
 }
@@ -344,25 +348,39 @@ async function lookupMember() {
   const phone = document.getElementById('phone-input').value.trim();
   if (!phone) { toast('Please enter your phone number 📱'); return; }
 
+  // ── STEP 1: Show local cache INSTANTLY (no waiting) ──
+  const localMember = byPhone(cache.get(), phone);
+  if (localMember) {
+    maybeRemember(localMember.phone, localMember.name);
+    renderResult(localMember);
+    // Then silently refresh from Sheets in background
+    syncMemberInBackground(phone);
+    return;
+  }
+
+  // ── STEP 2: Not in local cache — must check Sheets ──
   setLoading('lookup-btn', true);
   setSyncStatus('syncing', 'Looking up…');
 
   let member = null;
-
-  if (await checkOnline()) {
+  if (SCRIPT_URL !== 'YOUR_APPS_SCRIPT_URL_HERE') {
     try {
-      const r = await api('getMember', { phone });
+      const r = await Promise.race([
+        api('getMember', { phone }),
+        new Promise((_,rej) => setTimeout(() => rej(), 6000))
+      ]);
       if (r.ok) {
         member = r.member;
         const list = cache.get();
         const idx  = list.findIndex(m => m.phone.replace(/\s/g,'') === phone.replace(/\s/g,''));
         if (idx >= 0) list[idx] = member; else list.push(member);
         cache.save(list);
+        isOnline = true; onlineChecked = true;
+        setSyncStatus('online', 'Connected ✓');
       }
-    } catch(e) { isOnline = false; }
+    } catch(e) { setSyncStatus('offline','Offline'); }
   }
 
-  if (!member) member = byPhone(cache.get(), phone);
   setLoading('lookup-btn', false);
 
   if (!member) {
@@ -374,6 +392,29 @@ async function lookupMember() {
 
   maybeRemember(member.phone, member.name);
   renderResult(member);
+}
+
+// Silently update stamp data from Sheets without blocking the UI
+async function syncMemberInBackground(phone) {
+  if (SCRIPT_URL === 'YOUR_APPS_SCRIPT_URL_HERE') return;
+  try {
+    const r = await Promise.race([
+      api('getMember', { phone }),
+      new Promise((_,rej) => setTimeout(() => rej(), 8000))
+    ]);
+    if (r.ok && r.member) {
+      const list = cache.get();
+      const idx  = list.findIndex(m => m.phone.replace(/\s/g,'') === phone.replace(/\s/g,''));
+      if (idx >= 0) list[idx] = r.member; else list.push(r.member);
+      cache.save(list);
+      isOnline = true; onlineChecked = true;
+      setSyncStatus('online', 'Synced ✓');
+      // If stamps changed server-side, quietly re-render
+      if (document.getElementById('step-result').style.display !== 'none') {
+        renderResult(r.member);
+      }
+    }
+  } catch(e) {}
 }
 
 /* ══ RENDER STAMP CARD ══ */
@@ -417,8 +458,10 @@ async function registerMember() {
   const birthday = document.getElementById('reg-birthday').value;
   if (!name || !phone) { toast('Please fill in your name and phone 😊'); return; }
 
-  setLoading('reg-btn', true);
-  setSyncStatus('syncing', 'Registering…');
+  // Check local cache for duplicate INSTANTLY
+  if (byPhone(cache.get(), phone)) {
+    toast('Already registered! Try checking in.'); return;
+  }
 
   const newMember = {
     id: Date.now().toString(), name, phone, birthday,
@@ -426,28 +469,30 @@ async function registerMember() {
     pendingReward: false, lastVisit: new Date().toISOString(), history: []
   };
 
-  let saved = false;
-  if (await checkOnline()) {
-    try {
-      const r = await api('addMember', { member: newMember });
-      if (r.ok) { saved = true; }
-      else if (r.error === 'Phone already registered') {
-        toast('Already registered! Try checking in.'); setLoading('reg-btn', false); return;
-      }
-    } catch(e) {}
-  }
-
+  // ── Save locally FIRST — instant, no waiting ──
   const list = cache.get();
-  if (byPhone(list, phone)) { toast('Already registered! Try checking in.'); setLoading('reg-btn', false); return; }
   list.push(newMember);
   cache.save(list);
 
   maybeRemember(phone, name);
   notifyAdmin('signup', { name, phone });
-  setSyncStatus(saved ? 'online' : 'offline', saved ? 'Synced ✓' : 'Saved locally');
-  setLoading('reg-btn', false);
   toast(`Welcome to Topepop Tea, ${name}! 🎉`);
   renderResult(newMember);
+
+  // ── Then sync to Sheets in background ──
+  if (SCRIPT_URL !== 'YOUR_APPS_SCRIPT_URL_HERE') {
+    try {
+      const r = await Promise.race([
+        api('addMember', { member: newMember }),
+        new Promise((_,rej) => setTimeout(() => rej(), 8000))
+      ]);
+      if (r.ok) { isOnline=true; onlineChecked=true; setSyncStatus('online','Synced ✓'); }
+      else if (r.error === 'Phone already registered') {
+        // Already in Sheets — that's fine, local copy is correct
+        setSyncStatus('online','Connected ✓');
+      }
+    } catch(e) { setSyncStatus('offline','Saved locally — will sync later'); }
+  }
 }
 
 /* ══ GOOGLE REVIEW ══ */
