@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Topepop Tea – Admin Panel</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:      #1c1a14;
+    --card:    #252218;
+    --card2:   #2f2b1e;
+    --primary: #7da03a;
+    --primary2:#5a7a2e;
+    --amber:   #e8a820;
+    --amber2:  #c8860a;
+    --green:   #5a9e4a;
+    --red:     #c0392b;
+    --blue:    #2980b9;
+    --text:    #ede8d8;
+    --muted:   #8a7e62;
+    --border:  #3a3526;
+    --radius:  14px;
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:'Nunito',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; padding-bottom:80px; }
+
+  /* ── Topbar ── */
+  .topbar { background:var(--card); border-bottom:1px solid var(--border); padding:14px 22px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:100; }
+  .topbar-left { display:flex; align-items:center; gap:12px; }
+  .topbar-logo { width:40px; height:40px; border-radius:50%; overflow:hidden; background:#fff; }
+  .topbar-logo img { width:100%; height:100%; object-fit:contain; }
+  .topbar-title { font-family:'Baloo 2',cursive; font-size:1.2rem; color:var(--primary); font-weight:700; }
+  .topbar-sub   { font-size:0.75rem; color:var(--muted); }
+  .topbar-right { display:flex; align-items:center; gap:10px; }
+
+  /* Notification bell */
+  .notif-bell {
+    position:relative; width:38px; height:38px; border-radius:50%;
+    background:var(--card2); border:1px solid var(--border);
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer; font-size:1.1rem; transition:all 0.2s;
+  }
+  .notif-bell:hover { border-color:var(--amber); }
+  .notif-badge {
+    position:absolute; top:-4px; right:-4px;
+    width:18px; height:18px; border-radius:50%;
+    background:var(--red); color:#fff;
+    font-size:0.65rem; font-weight:800;
+    display:none; align-items:center; justify-content:center;
+    border:2px solid var(--bg);
+  }
+  .notif-badge.show { display:flex; }
+
+  .logout-btn { background:transparent; border:1.5px solid var(--muted); color:var(--muted); padding:6px 14px; border-radius:20px; cursor:pointer; font-family:'Nunito',sans-serif; font-weight:700; font-size:0.82rem; transition:all 0.2s; }
+  .logout-btn:hover { border-color:var(--red); color:var(--red); }
+
+  /* ── Login ── */
+  #login-screen { display:flex; align-items:center; justify-content:center; min-height:100vh; padding:24px; }
+  .login-card { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:36px 28px; width:100%; max-width:360px; box-shadow:0 16px 48px rgba(0,0,0,0.5); }
+  .login-card .logo-row { display:flex; align-items:center; gap:12px; margin-bottom:20px; }
+  .login-card .logo-row img { width:52px; height:52px; border-radius:50%; background:#fff; padding:2px; }
+  .login-title { font-family:'Baloo 2',cursive; font-size:1.4rem; color:var(--primary); }
+  .login-sub   { font-size:0.83rem; color:var(--muted); }
+
+  /* ── Inputs ── */
+  label { display:block; font-weight:700; font-size:0.82rem; color:var(--muted); margin-bottom:5px; text-transform:uppercase; letter-spacing:0.4px; }
+  input[type="text"], input[type="password"], input[type="tel"], input[type="date"] {
+    width:100%; padding:11px 14px; border-radius:10px;
+    border:1.5px solid var(--border); background:var(--card2);
+    color:var(--text); font-family:'Nunito',sans-serif; font-size:0.95rem;
+    outline:none; margin-bottom:14px; transition:border 0.2s;
+  }
+  input:focus { border-color:var(--primary); }
+
+  /* ── Buttons ── */
+  .btn { display:inline-block; padding:10px 18px; border:none; border-radius:10px; font-family:'Nunito',sans-serif; font-weight:800; font-size:0.9rem; cursor:pointer; transition:opacity 0.2s, transform 0.1s; line-height:1.2; }
+  .btn:hover  { opacity:0.85; }
+  .btn:active { transform:scale(0.96); }
+  .btn.block  { display:block; width:100%; text-align:center; padding:12px; }
+  .btn.green  { background:var(--green);   color:#fff; }
+  .btn.amber  { background:var(--amber);   color:#2e2008; }
+  .btn.red    { background:var(--red);     color:#fff; }
+  .btn.ghost  { background:var(--card2);   color:var(--text); border:1px solid var(--border); }
+  .btn.primary{ background:var(--primary); color:#fff; }
+  .btn.blue   { background:var(--blue);    color:#fff; }
+  .btn.sm     { padding:6px 12px; font-size:0.8rem; }
+
+  /* ── Main layout ── */
+  #main-app { display:none; }
+  .page     { padding:20px 22px; max-width:980px; margin:0 auto; }
+
+  /* ── Stats ── */
+  .stats-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin-bottom:20px; }
+  .stat-card  { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:14px 16px; }
+  .stat-val   { font-family:'Baloo 2',cursive; font-size:1.9rem; color:var(--primary); line-height:1; }
+  .stat-label { color:var(--muted); font-size:0.78rem; margin-top:3px; }
+
+  /* ── TODAY'S PANEL ── */
+  .today-panel {
+    background:var(--card); border:1px solid var(--border);
+    border-radius:var(--radius); margin-bottom:22px; overflow:hidden;
+  }
+  .today-header {
+    background:linear-gradient(135deg, var(--primary2), var(--primary));
+    padding:14px 18px; display:flex; align-items:center; justify-content:space-between;
+  }
+  .today-header h2 { font-family:'Baloo 2',cursive; font-size:1.1rem; color:#fff; }
+  .today-counter {
+    background:rgba(255,255,255,0.25); color:#fff;
+    padding:3px 10px; border-radius:20px; font-size:0.8rem; font-weight:800;
+  }
+  .today-list { padding:14px; }
+  .today-empty { text-align:center; padding:20px; color:var(--muted); font-size:0.88rem; }
+
+  /* Quick stamp card */
+  .quick-card {
+    background:var(--card2); border:1px solid var(--border);
+    border-radius:12px; padding:12px 14px;
+    display:flex; align-items:center; gap:12px;
+    margin-bottom:10px; transition:border 0.2s;
+  }
+  .quick-card:last-child { margin-bottom:0; }
+  .quick-card:hover { border-color:var(--primary); }
+  .quick-avatar {
+    width:42px; height:42px; border-radius:50%; background:var(--primary2);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Baloo 2',cursive; font-size:1.2rem; color:#fff; flex-shrink:0;
+  }
+  .quick-info { flex:1; min-width:0; }
+  .quick-name { font-weight:800; font-size:0.95rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .quick-meta { font-size:0.78rem; color:var(--muted); margin-top:2px; }
+  .quick-stamps { display:flex; gap:2px; margin-top:5px; }
+  .qs-dot { width:8px; height:8px; border-radius:50%; background:var(--border); }
+  .qs-dot.on { background:var(--amber); }
+  .quick-actions { display:flex; gap:6px; flex-shrink:0; }
+
+  /* Big stamp button */
+  .big-stamp-btn {
+    width:48px; height:48px; border-radius:12px;
+    background:linear-gradient(135deg, var(--primary), var(--primary2));
+    border:none; color:#fff; font-size:1.3rem; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    transition:transform 0.15s, box-shadow 0.15s;
+    box-shadow:0 3px 10px rgba(90,122,46,0.35);
+  }
+  .big-stamp-btn:hover  { transform:scale(1.08); box-shadow:0 5px 16px rgba(90,122,46,0.45); }
+  .big-stamp-btn:active { transform:scale(0.93); }
+
+  /* Stamp animation */
+  @keyframes stampPop {
+    0%   { transform:scale(0.5) rotate(-15deg); opacity:0; }
+    60%  { transform:scale(1.3) rotate(5deg);   opacity:1; }
+    100% { transform:scale(1)   rotate(0deg);   opacity:1; }
+  }
+  .stamp-pop { animation:stampPop 0.4s cubic-bezier(0.175,0.885,0.32,1.275) forwards; }
+
+  /* ── Notification popup ── */
+  .notif-popup {
+    position:fixed; top:70px; right:16px;
+    width:300px; z-index:500;
+    display:flex; flex-direction:column; gap:8px;
+    pointer-events:none;
+  }
+  .notif-item {
+    background:var(--card); border:1px solid var(--border);
+    border-radius:14px; padding:14px 16px;
+    box-shadow:0 8px 28px rgba(0,0,0,0.5);
+    pointer-events:all;
+    animation:slideIn 0.35s cubic-bezier(0.175,0.885,0.32,1.275) forwards;
+    position:relative; overflow:hidden;
+  }
+  .notif-item::before {
+    content:''; position:absolute; left:0; top:0; bottom:0;
+    width:4px; border-radius:14px 0 0 14px;
+  }
+  .notif-item.signup::before  { background:var(--primary); }
+  .notif-item.review::before  { background:#4285f4; }
+  .notif-title { font-weight:800; font-size:0.92rem; margin-bottom:3px; }
+  .notif-body  { font-size:0.82rem; color:var(--muted); }
+  .notif-close { position:absolute; top:8px; right:10px; cursor:pointer; color:var(--muted); font-size:0.8rem; font-weight:700; }
+  .notif-close:hover { color:var(--text); }
+  @keyframes slideIn {
+    from { opacity:0; transform:translateX(60px); }
+    to   { opacity:1; transform:translateX(0); }
+  }
+  @keyframes slideOut {
+    from { opacity:1; transform:translateX(0); max-height:200px; }
+    to   { opacity:0; transform:translateX(60px); max-height:0; padding:0; margin:0; }
+  }
+  .notif-item.hiding { animation:slideOut 0.3s forwards; }
+
+  /* ── Notification history panel ── */
+  .notif-history {
+    background:var(--card); border:1px solid var(--border);
+    border-radius:var(--radius); margin-bottom:22px; overflow:hidden; display:none;
+  }
+  .notif-history-header { background:var(--card2); padding:12px 16px; display:flex; align-items:center; justify-content:space-between; }
+  .notif-history-header h3 { font-family:'Baloo 2',cursive; font-size:1rem; color:var(--text); }
+  .notif-row { padding:10px 16px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:12px; font-size:0.85rem; }
+  .notif-row:last-child { border-bottom:none; }
+  .notif-row .icon { font-size:1.1rem; flex-shrink:0; }
+  .notif-row .nr-time { color:var(--muted); font-size:0.75rem; margin-left:auto; }
+
+  /* ── QR box ── */
+  .qr-box { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:18px; text-align:center; margin-bottom:20px; }
+  .qr-box p { color:var(--muted); font-size:0.85rem; margin-bottom:12px; }
+  #qr-gen   { display:inline-block; background:#fff; padding:8px; border-radius:10px; }
+
+  /* ── Members table ── */
+  .section-title { font-family:'Baloo 2',cursive; font-size:1.1rem; color:var(--text); margin-bottom:12px; }
+  .search-row    { display:flex; gap:10px; margin-bottom:14px; flex-wrap:wrap; }
+  .search-row input { flex:1; min-width:200px; margin-bottom:0; }
+  .table-wrap { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; }
+  table { width:100%; border-collapse:collapse; }
+  thead { background:var(--card2); }
+  th { padding:10px 14px; text-align:left; font-size:0.76rem; color:var(--muted); text-transform:uppercase; letter-spacing:0.4px; }
+  td { padding:10px 14px; font-size:0.87rem; border-bottom:1px solid var(--border); vertical-align:middle; }
+  tr:last-child td { border-bottom:none; }
+  tr:hover td { background:rgba(255,255,255,0.02); }
+  .badge { display:inline-block; padding:3px 9px; border-radius:20px; font-size:0.72rem; font-weight:800; }
+  .b-bday   { background:#e65100; color:#fff; }
+  .b-reward { background:var(--green); color:#fff; }
+  .b-new    { background:var(--primary); color:#fff; }
+  .s-bar    { display:flex; gap:3px; align-items:center; }
+  .s-dot    { width:9px; height:9px; border-radius:50%; background:var(--border); }
+  .s-dot.on { background:var(--amber); }
+  .empty-state { text-align:center; padding:36px; color:var(--muted); font-size:0.93rem; }
+
+  /* ── Modals ── */
+  .overlay { position:fixed; inset:0; background:rgba(0,0,0,0.75); display:none; align-items:center; justify-content:center; z-index:200; padding:20px; }
+  .overlay.open { display:flex; }
+  .modal { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:26px 22px; width:100%; max-width:400px; box-shadow:0 24px 64px rgba(0,0,0,0.6); }
+  .modal h3 { font-family:'Baloo 2',cursive; color:var(--primary); font-size:1.2rem; margin-bottom:16px; }
+  .modal-foot { display:flex; gap:10px; margin-top:18px; justify-content:flex-end; }
+
+  /* ── Backup section ── */
+  #drop-zone { border:2px dashed var(--border); border-radius:12px; padding:22px; text-align:center; cursor:pointer; color:var(--muted); font-size:0.87rem; transition:all 0.2s; background:var(--card2); }
+  #drop-zone:hover { border-color:var(--primary); background:rgba(125,160,58,0.06); }
+  #import-result { display:none; margin-top:12px; padding:12px 14px; border-radius:10px; font-size:0.87rem; font-weight:700; }
+
+  .divider { border:none; border-top:1px solid var(--border); margin:20px 0; }
+
+  /* ── Toast ── */
+  .toast { position:fixed; bottom:22px; left:50%; transform:translateX(-50%) translateY(80px); background:var(--card2); color:var(--text); border:1px solid var(--border); padding:10px 22px; border-radius:30px; font-size:0.9rem; font-weight:700; transition:transform 0.3s; z-index:999; white-space:nowrap; }
+  .toast.show { transform:translateX(-50%) translateY(0); }
+
+  @media(max-width:600px) {
+    th:nth-child(3), td:nth-child(3),
+    th:nth-child(5), td:nth-child(5) { display:none; }
+    .quick-stamps { display:none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── LOGIN ── -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="logo-row">
+      <img src="logo.png" alt="Topepop Tea">
+      <div>
+        <div class="login-title">Admin Panel</div>
+        <div class="login-sub">Topepop Tea – Werribee</div>
+      </div>
+    </div>
+    <label>Staff Password</label>
+    <input type="password" id="login-pass" placeholder="Enter password" onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="btn primary block" onclick="doLogin()">Login →</button>
+    </div>
+</div>
+
+<!-- ── MAIN APP ── -->
+<div id="main-app">
+
+  <!-- Topbar -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="topbar-logo"><img src="logo.png" alt="logo"></div>
+      <div>
+        <div class="topbar-title">Topepop Tea</div>
+        <div class="topbar-sub" id="topbar-date">—</div>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <div class="notif-bell" onclick="toggleNotifHistory()" title="Notifications">
+        🔔
+        <div class="notif-badge" id="notif-badge">0</div>
+      </div>
+      <button class="logout-btn" onclick="doLogout()">Logout</button>
+    </div>
+  </div>
+
+  <!-- Floating notification popups -->
+  <div class="notif-popup" id="notif-popup"></div>
+
+  <div class="page">
+
+    <!-- Stats -->
+    <div class="stats-grid" id="stats-grid"></div>
+
+    <!-- ══ TODAY'S CUSTOMERS ══ -->
+    <div class="today-panel">
+      <div class="today-header">
+        <h2>⚡ Today's Customers</h2>
+        <div class="today-counter" id="today-counter">0 visits</div>
+      </div>
+      <div class="today-list" id="today-list">
+        <div class="today-empty">No customers yet today — they'll appear here after check-in 🧋</div>
+      </div>
+    </div>
+
+    <!-- ══ NOTIFICATION HISTORY ══ -->
+    <div class="notif-history" id="notif-history">
+      <div class="notif-history-header">
+        <h3>🔔 Recent Alerts</h3>
+        <button class="btn ghost sm" onclick="clearNotifHistory()">Clear</button>
+      </div>
+      <div id="notif-history-list"></div>
+    </div>
+
+    <!-- QR Code -->
+    <div class="qr-box">
+      <p>📱 Print this QR code and place it at your counter</p>
+      <div id="qr-gen"></div>
+      <div style="margin-top:10px;font-size:0.76rem;color:var(--muted)">Points to: <span id="qr-url-label" style="color:var(--primary)">—</span></div>
+      <div style="margin-top:12px"><button class="btn amber sm" onclick="window.print()">🖨️ Print QR</button></div>
+    </div>
+
+    <!-- Members table -->
+    <div class="section-title">👥 All Members</div>
+    <div class="search-row">
+      <input type="text" id="search" placeholder="Search name or phone…" oninput="renderTable()">
+      <button class="btn green" onclick="openAdd()">+ Add Member</button>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Name</th><th>Phone</th><th>Birthday</th><th>Stamps</th><th>Joined</th><th>Actions</th></tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+      <div class="empty-state" id="empty-state" style="display:none">🧋 No members yet!</div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Settings -->
+    <div class="section-title">⚙️ Settings</div>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px">
+      <label>Shop Name</label>         <input type="text"     id="s-shopname"  placeholder="Topepop Tea">
+      <label>Google Review Link</label><input type="text"     id="s-googleurl" placeholder="https://g.page/r/...">
+      <label>New Admin Password</label><input type="password" id="s-pass"      placeholder="Leave blank to keep current">
+      <button class="btn primary" onclick="saveSettings()">💾 Save Settings</button>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Backup -->
+    <div class="section-title">💾 Backup & Restore</div>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px">
+      <div id="backup-status" style="background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:12px 16px;margin-bottom:16px;font-size:0.86rem;color:var(--muted);display:flex;align-items:center;gap:10px;">
+        <span style="font-size:1.2rem">📅</span>
+        <div><div style="font-weight:700;color:var(--text)">Last backup</div><div id="last-backup-label">Never</div></div>
+        <div id="backup-dot" style="width:10px;height:10px;border-radius:50%;background:var(--red);margin-left:auto;flex-shrink:0;"></div>
+      </div>
+      <div id="auto-export-notice" style="background:rgba(93,158,74,0.12);border:1px solid rgba(93,158,74,0.3);border-radius:10px;padding:10px 14px;margin-bottom:16px;font-size:0.82rem;color:var(--primary);display:none;">
+        ✅ <strong>Auto-export active</strong> — downloads every Sunday when you open this page.
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px">
+        <button class="btn amber"  onclick="exportCSV()">⬇️ Export CSV</button>
+        <button class="btn ghost"  id="auto-toggle-btn" onclick="toggleAutoExport()">⏰ Enable Auto Export</button>
+      </div>
+      <div style="border-top:1px solid var(--border);padding-top:16px">
+        <div style="font-weight:700;color:var(--text);font-size:0.88rem;margin-bottom:8px">📂 Restore from CSV</div>
+        <div id="drop-zone" onclick="document.getElementById('csv-file-input').click()" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event)">
+          <div style="font-size:1.8rem;margin-bottom:8px">📄</div>
+          <div><strong style="color:var(--text)">Click or drag &amp; drop</strong> your CSV backup here</div>
+        </div>
+        <input type="file" id="csv-file-input" accept=".csv" style="display:none" onchange="importCSV(this)">
+        <div id="import-result"></div>
+      </div>
+      <div style="border-top:1px solid var(--border);padding-top:14px;margin-top:14px">
+        <button class="btn red sm" onclick="clearAll()">🗑️ Clear All Data</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Add/Edit modal -->
+<div class="overlay" id="modal-member">
+  <div class="modal">
+    <h3 id="modal-title">Add Member</h3>
+    <input type="hidden" id="m-id">
+    <label>Full Name</label>    <input type="text" id="m-name"    placeholder="Customer name">
+    <label>Phone</label>        <input type="tel"  id="m-phone"   placeholder="0412 345 678">
+    <label>Birthday</label>     <input type="date" id="m-birthday">
+    <label>Total Stamps</label> <input type="text" id="m-stamps"  placeholder="0">
+    <div class="modal-foot">
+      <button class="btn red sm" onclick="closeModal('modal-member')">Cancel</button>
+      <button class="btn green"  onclick="saveMember()">Save ✓</button>
+    </div>
+  </div>
+</div>
+
+<!-- Stamp modal -->
+<div class="overlay" id="modal-stamp">
+  <div class="modal">
+    <h3>🧋 <span id="sm-name">—</span></h3>
+    <div id="sm-bar"   style="font-size:1.25rem;margin-bottom:8px;letter-spacing:2px"></div>
+    <div id="sm-count" style="color:var(--muted);font-size:0.85rem;margin-bottom:16px"></div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <button class="btn green" onclick="addStamp(null)">+ Add Stamp</button>
+      <button class="btn amber" onclick="redeemReward(null)">🎁 Redeem Reward</button>
+      <button class="btn ghost sm" onclick="editFromStamp()">✏️ Edit</button>
+    </div>
+    <div class="modal-foot">
+      <button class="btn red sm" onclick="closeModal('modal-stamp')">Close</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+const STAMPS = 10;
+let activeMember = null;
+let unreadNotifs = 0;
+let lastNotifId  = null;
+
+/* ══ STORAGE ══ */
+const getMembers  = ()   => JSON.parse(localStorage.getItem('topepopMembers')  || '[]');
+const saveMembers = list => localStorage.setItem('topepopMembers',  JSON.stringify(list));
+const getSettings = ()   => JSON.parse(localStorage.getItem('topepopSettings') ||
+  '{"password":"boba1234","shopName":"Topepop Tea","googleUrl":""}');
+const saveSettingsStore = s => localStorage.setItem('topepopSettings', JSON.stringify(s));
+
+/* ══ AUTH ══ */
+function doLogin() {
+  if (document.getElementById('login-pass').value === getSettings().password) {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('main-app').style.display = 'block';
+    init();
+  } else { toast('Wrong password ❌'); }
+}
+function doLogout() {
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('main-app').style.display = 'none';
+  document.getElementById('login-pass').value = '';
+  window.removeEventListener('storage', onStorageEvent);
+}
+
+/* ══ INIT ══ */
+function init() {
+  setTopbarDate();
+  renderStats();
+  renderQR();
+  renderTable();
+  renderTodayPanel();
+  loadSettings();
+  updateBackupStatus();
+  updateAutoExportUI();
+  checkAutoExport();
+  renderNotifHistory();
+  // Listen for events from customer page (same device, different tab/window)
+  window.addEventListener('storage', onStorageEvent);
+  // Poll every 3s as fallback (same tab scenario)
+  setInterval(pollNotifications, 3000);
+}
+
+function setTopbarDate() {
+  document.getElementById('topbar-date').textContent =
+    new Date().toLocaleDateString('en-AU',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
+}
+
+function isBday(s) {
+  if (!s) return false;
+  const t=new Date(), b=new Date(s);
+  return b.getMonth()===t.getMonth() && b.getDate()===t.getDate();
+}
+function fmtDate(s) {
+  if (!s) return '—';
+  return new Date(s).toLocaleDateString('en-AU',{month:'short',day:'numeric'});
+}
+function fmtTime(isoStr) {
+  if (!isoStr) return '';
+  return new Date(isoStr).toLocaleTimeString('en-AU',{hour:'2-digit',minute:'2-digit'});
+}
+function todayStr() { return new Date().toISOString().split('T')[0]; }
+
+/* ══ STATS ══ */
+function renderStats() {
+  const ms      = getMembers();
+  const bdays   = ms.filter(m => isBday(m.birthday)).length;
+  const rewards = ms.filter(m => m.pendingReward).length;
+  const todayVisits = ms.filter(m => (m.history||[]).some(h => h.date?.startsWith(todayStr()))).length;
+  document.getElementById('stats-grid').innerHTML = `
+    <div class="stat-card"><div class="stat-val">${ms.length}</div><div class="stat-label">Members</div></div>
+    <div class="stat-card"><div class="stat-val">${todayVisits}</div><div class="stat-label">Today's Visits</div></div>
+    <div class="stat-card" style="border-color:#e65100"><div class="stat-val" style="color:#e65100">${bdays}</div><div class="stat-label">🎂 Birthdays</div></div>
+    <div class="stat-card" style="border-color:var(--green)"><div class="stat-val" style="color:var(--green)">${rewards}</div><div class="stat-label">🎁 Rewards</div></div>
+  `;
+}
+
+/* ══ TODAY'S PANEL ══ */
+function renderTodayPanel() {
+  const today = todayStr();
+  const ms = getMembers().filter(m =>
+    (m.history||[]).some(h => h.date?.startsWith(today)) || m.joinDate === today
+  );
+  // Sort by most recent activity
+  ms.sort((a,b) => {
+    const aLast = [...(a.history||[])].reverse().find(h=>h.date?.startsWith(today))?.date || a.joinDate;
+    const bLast = [...(b.history||[])].reverse().find(h=>h.date?.startsWith(today))?.date || b.joinDate;
+    return bLast?.localeCompare(aLast||'') || 0;
+  });
+
+  document.getElementById('today-counter').textContent = `${ms.length} visit${ms.length!==1?'s':''}`;
+  const list = document.getElementById('today-list');
+
+  if (!ms.length) {
+    list.innerHTML = '<div class="today-empty">No customers yet today — they\'ll appear here after check-in 🧋</div>';
+    return;
+  }
+
+  list.innerHTML = ms.map(m => {
+    const cur  = m.stamps % STAMPS;
+    const dots = Array.from({length:STAMPS},(_,i)=>`<div class="qs-dot${i<cur?' on':''}"></div>`).join('');
+    const isNew   = m.joinDate === today;
+    const bdayBdg = isBday(m.birthday) ? '<span class="badge b-bday" style="font-size:0.65rem">🎂</span> ' : '';
+    const rwdBdg  = m.pendingReward    ? '<span class="badge b-reward" style="font-size:0.65rem">🎁</span> ' : '';
+    const newBdg  = isNew              ? '<span class="badge b-new"    style="font-size:0.65rem">New!</span> ' : '';
+    // Last visit time today
+    const lastH = [...(m.history||[])].reverse().find(h=>h.date?.startsWith(today));
+    const timeLabel = lastH ? fmtTime(lastH.date) : (isNew ? 'Registered today' : '');
+    return `
+    <div class="quick-card" id="qc-${m.id}">
+      <div class="quick-avatar">${m.name.charAt(0).toUpperCase()}</div>
+      <div class="quick-info">
+        <div class="quick-name">${m.name} ${bdayBdg}${rwdBdg}${newBdg}</div>
+        <div class="quick-meta">${m.phone} · ${timeLabel}</div>
+        <div class="quick-stamps">${dots}</div>
+      </div>
+      <div class="quick-actions">
+        <button class="big-stamp-btn" onclick="quickStamp('${m.id}')" title="Add stamp">🧋</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ══ QUICK STAMP (from Today panel) ══ */
+function quickStamp(id) {
+  addStamp(id);
+  // Animate the button
+  const card = document.getElementById(`qc-${id}`);
+  if (card) {
+    const btn = card.querySelector('.big-stamp-btn');
+    btn.classList.remove('stamp-pop');
+    void btn.offsetWidth; // reflow
+    btn.classList.add('stamp-pop');
+    setTimeout(() => btn.classList.remove('stamp-pop'), 500);
+  }
+  // Refresh today panel after short delay
+  setTimeout(() => { renderTodayPanel(); renderStats(); }, 200);
+}
+
+/* ══ QR ══ */
+function renderQR() {
+  const url = window.location.href.replace('admin.html','index.html');
+  document.getElementById('qr-url-label').textContent = url;
+  document.getElementById('qr-gen').innerHTML = '';
+  new QRCode(document.getElementById('qr-gen'), {text:url, width:160, height:160, correctLevel:QRCode.CorrectLevel.H});
+}
+
+/* ══ TABLE ══ */
+function renderTable() {
+  const q  = (document.getElementById('search')?.value||'').toLowerCase();
+  let ms   = getMembers().filter(m => !q || m.name.toLowerCase().includes(q) || m.phone.includes(q))
+                         .sort((a,b)=>a.name.localeCompare(b.name));
+  const tbody = document.getElementById('tbody');
+  const empty = document.getElementById('empty-state');
+  if (!ms.length) { tbody.innerHTML=''; empty.style.display='block'; return; }
+  empty.style.display='none';
+  tbody.innerHTML = ms.map(m => {
+    const cur  = m.stamps % STAMPS;
+    const dots = Array.from({length:STAMPS},(_,i)=>`<div class="s-dot${i<cur?' on':''}"></div>`).join('');
+    const bdB  = isBday(m.birthday) ? '<span class="badge b-bday">🎂 Birthday!</span> ' : '';
+    const rwB  = m.pendingReward    ? '<span class="badge b-reward">🎁 Reward!</span>'  : '';
+    const newB = m.joinDate===todayStr() ? '<span class="badge b-new">New!</span> ' : '';
+    return `<tr>
+      <td><strong>${m.name}</strong> ${bdB}${rwB}${newB}</td>
+      <td>${m.phone}</td>
+      <td>${m.birthday ? fmtDate(m.birthday) : '—'}</td>
+      <td><div class="s-bar">${dots}</div><small style="color:var(--muted)">${m.stamps} total</small></td>
+      <td>${m.joinDate||'—'}</td>
+      <td style="display:flex;gap:6px;flex-wrap:wrap">
+        <button class="btn green sm" onclick="openStamp('${m.id}')">🧋 Stamp</button>
+        <button class="btn ghost sm" onclick="openEdit('${m.id}')">✏️</button>
+        <button class="btn red   sm" onclick="delMember('${m.id}')">🗑️</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+/* ══ ADD/EDIT MODAL ══ */
+function openAdd() {
+  document.getElementById('modal-title').textContent = 'Add Member';
+  ['m-id','m-name','m-phone','m-birthday'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('m-stamps').value='0';
+  openModal('modal-member');
+}
+function openEdit(id) {
+  const m=getMembers().find(x=>x.id===id); if(!m) return;
+  document.getElementById('modal-title').textContent='Edit Member';
+  document.getElementById('m-id').value=m.id;
+  document.getElementById('m-name').value=m.name;
+  document.getElementById('m-phone').value=m.phone;
+  document.getElementById('m-birthday').value=m.birthday||'';
+  document.getElementById('m-stamps').value=m.stamps;
+  openModal('modal-member');
+}
+function saveMember() {
+  const id=document.getElementById('m-id').value;
+  const name=document.getElementById('m-name').value.trim();
+  const phone=document.getElementById('m-phone').value.trim();
+  const birthday=document.getElementById('m-birthday').value;
+  const stamps=parseInt(document.getElementById('m-stamps').value)||0;
+  if (!name||!phone) { toast('Name and phone required!'); return; }
+  let list=getMembers();
+  if (id) {
+    list=list.map(m=>m.id===id?{...m,name,phone,birthday,stamps}:m);
+    toast('Updated ✓');
+  } else {
+    if (list.find(m=>m.phone.replace(/\s/g,'')===phone.replace(/\s/g,''))) { toast('Phone exists!'); return; }
+    list.push({id:Date.now().toString(),name,phone,birthday,stamps,joinDate:todayStr(),pendingReward:false,history:[]});
+    toast(`${name} added! 🎉`);
+  }
+  saveMembers(list);
+  closeModal('modal-member');
+  renderTable(); renderStats(); renderTodayPanel();
+}
+function delMember(id) {
+  if(!confirm('Delete this member?')) return;
+  saveMembers(getMembers().filter(m=>m.id!==id));
+  renderTable(); renderStats(); renderTodayPanel(); toast('Deleted');
+}
+
+/* ══ STAMP MODAL ══ */
+function openStamp(id) { activeMember=id; refreshStampModal(); openModal('modal-stamp'); }
+function refreshStampModal() {
+  const m=getMembers().find(x=>x.id===activeMember); if(!m) return;
+  const cur=m.stamps%STAMPS;
+  document.getElementById('sm-name').textContent=m.name;
+  document.getElementById('sm-bar').textContent=Array.from({length:STAMPS},(_,i)=>i<cur?'🧋':'⬜').join('');
+  let info=`${m.stamps} total · ${cur}/${STAMPS} this cycle`;
+  if(isBday(m.birthday)) info+=' 🎂 BIRTHDAY!';
+  if(m.pendingReward)    info+=' 🎁 HAS REWARD!';
+  document.getElementById('sm-count').textContent=info;
+}
+function editFromStamp() { closeModal('modal-stamp'); openEdit(activeMember); }
+
+/* ══ ADD STAMP (shared by modal + quick stamp) ══ */
+function addStamp(id) {
+  const targetId = id || activeMember;
+  let list=getMembers();
+  const i=list.findIndex(m=>m.id===targetId); if(i<0) return;
+  list[i].stamps++;
+  list[i].history=list[i].history||[];
+  list[i].history.push({date:new Date().toISOString(),action:'stamp'});
+  if (list[i].stamps%STAMPS===0) {
+    list[i].pendingReward=true;
+    playSound('reward');
+    toast(`🎉 ${list[i].name} earned a FREE DRINK!`,3500);
+  } else {
+    playSound('stamp');
+    toast(`Stamp! ${list[i].stamps%STAMPS}/${STAMPS} for ${list[i].name.split(' ')[0]}`);
+  }
+  saveMembers(list);
+  if (!id) refreshStampModal(); // only refresh modal if opened from modal
+  renderTable(); renderStats();
+}
+
+function redeemReward(id) {
+  const targetId = id || activeMember;
+  let list=getMembers();
+  const i=list.findIndex(m=>m.id===targetId); if(i<0) return;
+  if(!list[i].pendingReward) { toast('No reward to redeem.'); return; }
+  list[i].pendingReward=false;
+  list[i].history.push({date:new Date().toISOString(),action:'redeem'});
+  saveMembers(list);
+  playSound('reward');
+  toast(`Reward redeemed for ${list[i].name}! 🎁`);
+  if(!id) refreshStampModal();
+  renderTable(); renderStats(); renderTodayPanel();
+}
+
+/* ══ SOUND ENGINE ══ */
+function playSound(type) {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    if (type==='stamp') {
+      // Short pleasant tick
+      const o=ctx.createOscillator(), g=ctx.createGain();
+      o.connect(g); g.connect(ctx.destination);
+      o.frequency.setValueAtTime(880,ctx.currentTime);
+      o.frequency.exponentialRampToValueAtTime(440,ctx.currentTime+0.1);
+      g.gain.setValueAtTime(0.3,ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.15);
+      o.start(); o.stop(ctx.currentTime+0.15);
+    } else if (type==='reward') {
+      // Ascending chime — reward!
+      [523,659,784,1047].forEach((freq,i) => {
+        const o=ctx.createOscillator(), g=ctx.createGain();
+        o.connect(g); g.connect(ctx.destination);
+        o.type='sine'; o.frequency.value=freq;
+        const t=ctx.currentTime+i*0.12;
+        g.gain.setValueAtTime(0,t);
+        g.gain.linearRampToValueAtTime(0.3,t+0.05);
+        g.gain.exponentialRampToValueAtTime(0.001,t+0.3);
+        o.start(t); o.stop(t+0.3);
+      });
+    } else if (type==='signup') {
+      // Two-note welcome chime
+      [660,880].forEach((freq,i) => {
+        const o=ctx.createOscillator(), g=ctx.createGain();
+        o.connect(g); g.connect(ctx.destination);
+        o.type='sine'; o.frequency.value=freq;
+        const t=ctx.currentTime+i*0.18;
+        g.gain.setValueAtTime(0,t);
+        g.gain.linearRampToValueAtTime(0.25,t+0.04);
+        g.gain.exponentialRampToValueAtTime(0.001,t+0.35);
+        o.start(t); o.stop(t+0.35);
+      });
+    } else if (type==='review') {
+      // Soft sparkle — Google review
+      [1047,1319,1568].forEach((freq,i) => {
+        const o=ctx.createOscillator(), g=ctx.createGain();
+        o.connect(g); g.connect(ctx.destination);
+        o.type='triangle'; o.frequency.value=freq;
+        const t=ctx.currentTime+i*0.1;
+        g.gain.setValueAtTime(0,t);
+        g.gain.linearRampToValueAtTime(0.2,t+0.04);
+        g.gain.exponentialRampToValueAtTime(0.001,t+0.28);
+        o.start(t); o.stop(t+0.28);
+      });
+    }
+  } catch(e) { /* Audio not available */ }
+}
+
+/* ══ NOTIFICATION SYSTEM ══ */
+
+// Listen for localStorage changes (fires when ANOTHER tab writes)
+function onStorageEvent(e) {
+  if (e.key === 'topepopLatestNotif' && e.newValue) {
+    try {
+      const notif = JSON.parse(e.newValue);
+      if (notif.id !== lastNotifId) {
+        lastNotifId = notif.id;
+        handleNotif(notif);
+      }
+    } catch(err) {}
+  }
+}
+
+// Poll for notifications (catches same-tab writes)
+let lastPollId = null;
+function pollNotifications() {
+  try {
+    const raw = localStorage.getItem('topepopLatestNotif');
+    if (!raw) return;
+    const notif = JSON.parse(raw);
+    if (notif.id !== lastPollId && notif.id !== lastNotifId) {
+      lastPollId = notif.id;
+      lastNotifId = notif.id;
+      handleNotif(notif);
+    }
+  } catch(e) {}
+}
+
+function handleNotif(notif) {
+  if (notif.type === 'signup') {
+    playSound('signup');
+    showNotifPopup('signup', `🎉 New Member!`, `${notif.data.name} just signed up`);
+    renderStats(); renderTable(); renderTodayPanel();
+  } else if (notif.type === 'review') {
+    playSound('review');
+    showNotifPopup('review', `⭐ Google Review!`, `${notif.data.name} tapped to leave a review`);
+  }
+  // Save to history
+  const queue = JSON.parse(localStorage.getItem('topepopNotifications') || '[]');
+  unreadNotifs = queue.filter(n => !n.read).length;
+  updateNotifBadge();
+  renderNotifHistory();
+}
+
+function showNotifPopup(type, title, body) {
+  const popup = document.getElementById('notif-popup');
+  const el    = document.createElement('div');
+  el.className = `notif-item ${type}`;
+  el.innerHTML = `
+    <div class="notif-title">${title}</div>
+    <div class="notif-body">${body}</div>
+    <div class="notif-close" onclick="dismissNotif(this)">✕</div>
+  `;
+  popup.prepend(el);
+  // Auto-dismiss after 6 seconds
+  setTimeout(() => dismissNotif(el.querySelector('.notif-close')), 6000);
+  // Increment badge
+  unreadNotifs++;
+  updateNotifBadge();
+}
+
+function dismissNotif(closeBtn) {
+  const el = closeBtn.closest ? closeBtn.closest('.notif-item') : closeBtn.parentElement;
+  if (!el || el.classList.contains('hiding')) return;
+  el.classList.add('hiding');
+  setTimeout(() => el.remove(), 300);
+}
+
+function updateNotifBadge() {
+  const badge = document.getElementById('notif-badge');
+  if (unreadNotifs > 0) {
+    badge.textContent = unreadNotifs > 9 ? '9+' : unreadNotifs;
+    badge.classList.add('show');
+  } else {
+    badge.classList.remove('show');
+  }
+}
+
+function toggleNotifHistory() {
+  const panel = document.getElementById('notif-history');
+  const isOpen = panel.style.display !== 'none' && panel.style.display !== '';
+  panel.style.display = isOpen ? 'none' : 'block';
+  if (!isOpen) {
+    // Mark all as read
+    const queue = JSON.parse(localStorage.getItem('topepopNotifications') || '[]');
+    queue.forEach(n => n.read = true);
+    localStorage.setItem('topepopNotifications', JSON.stringify(queue));
+    unreadNotifs = 0;
+    updateNotifBadge();
+    renderNotifHistory();
+  }
+}
+
+function renderNotifHistory() {
+  const queue = JSON.parse(localStorage.getItem('topepopNotifications') || '[]');
+  const list  = document.getElementById('notif-history-list');
+  if (!queue.length) {
+    list.innerHTML = '<div style="padding:16px;text-align:center;color:var(--muted);font-size:0.87rem">No notifications yet</div>';
+    return;
+  }
+  const sorted = [...queue].reverse().slice(0,20);
+  list.innerHTML = sorted.map(n => {
+    const icon  = n.type==='signup' ? '🎉' : '⭐';
+    const label = n.type==='signup'
+      ? `New signup: <strong>${n.data?.name}</strong>`
+      : `Google Review tapped by <strong>${n.data?.name}</strong>`;
+    return `<div class="notif-row">
+      <div class="icon">${icon}</div>
+      <div>${label}</div>
+      <div class="nr-time">${fmtTime(n.time)}</div>
+    </div>`;
+  }).join('');
+}
+
+function clearNotifHistory() {
+  localStorage.removeItem('topepopNotifications');
+  localStorage.removeItem('topepopLatestNotif');
+  unreadNotifs = 0;
+  updateNotifBadge();
+  renderNotifHistory();
+  toast('Notification history cleared');
+}
+
+/* ══ SETTINGS ══ */
+function loadSettings() {
+  const s=getSettings();
+  document.getElementById('s-shopname').value=s.shopName||'';
+  document.getElementById('s-googleurl').value=s.googleUrl||'';
+}
+function saveSettings() {
+  const s=getSettings();
+  const sn=document.getElementById('s-shopname').value.trim();
+  const gu=document.getElementById('s-googleurl').value.trim();
+  const pw=document.getElementById('s-pass').value;
+  if(sn) s.shopName=sn;
+  if(gu) s.googleUrl=gu;
+  if(pw) s.password=pw;
+  saveSettingsStore(s);
+  document.getElementById('s-pass').value='';
+  toast('Settings saved ✓');
+}
+
+/* ══ BACKUP / RESTORE ══ */
+function buildCSV(ms) {
+  const header='Name,Phone,Birthday,Stamps,Joined,PendingReward,ID';
+  const rows=ms.map(m=>[
+    `"${(m.name||'').replace(/"/g,'""')}"`,
+    `"${(m.phone||'').replace(/"/g,'""')}"`,
+    `"${m.birthday||''}"`,`"${m.stamps||0}"`,
+    `"${m.joinDate||''}"`,`"${m.pendingReward?'Yes':'No'}"`,`"${m.id||''}"`
+  ].join(','));
+  return [header,...rows].join('\n');
+}
+function exportCSV(silent=false) {
+  const ms=getMembers();
+  if(!ms.length) { if(!silent) toast('No data'); return; }
+  const d=new Date().toISOString().slice(0,10);
+  const blob=new Blob([buildCSV(ms)],{type:'text/csv;charset=utf-8;'});
+  Object.assign(document.createElement('a'),{href:URL.createObjectURL(blob),download:`topepop-members-${d}.csv`}).click();
+  const s=getSettings(); s.lastBackup=new Date().toISOString(); saveSettingsStore(s);
+  updateBackupStatus();
+  if(!silent) toast('✅ CSV downloaded!');
+}
+function toggleAutoExport() {
+  const s=getSettings(); s.autoExport=!s.autoExport; saveSettingsStore(s);
+  updateAutoExportUI();
+  toast(s.autoExport?'⏰ Auto export ON!':'Auto export off');
+}
+function updateAutoExportUI() {
+  const s=getSettings();
+  const btn=document.getElementById('auto-toggle-btn');
+  const note=document.getElementById('auto-export-notice');
+  if(!btn) return;
+  btn.textContent  = s.autoExport ? '⏰ Disable Auto Export' : '⏰ Enable Auto Export';
+  btn.className    = s.autoExport ? 'btn green' : 'btn ghost';
+  note.style.display = s.autoExport ? 'block' : 'none';
+}
+function checkAutoExport() {
+  const s=getSettings(); if(!s.autoExport) return;
+  const today=new Date(); if(today.getDay()!==0) return;
+  const todayS=today.toISOString().slice(0,10);
+  if(s.lastAutoExport===todayS) return;
+  exportCSV(true);
+  s.lastAutoExport=todayS; saveSettingsStore(s);
+  toast('📅 Sunday auto-backup downloaded!',3500);
+}
+function updateBackupStatus() {
+  const s=getSettings();
+  const label=document.getElementById('last-backup-label');
+  const dot=document.getElementById('backup-dot');
+  if(!label) return;
+  if(!s.lastBackup) { label.textContent='Never'; dot.style.background='var(--red)'; return; }
+  const d=new Date(s.lastBackup), now=new Date();
+  const days=Math.floor((now-d)/86400000);
+  label.textContent=days===0?`Today ${fmtTime(s.lastBackup)}`:days===1?'Yesterday':`${days} days ago`;
+  dot.style.background=days<=7?'var(--green)':days<=14?'var(--amber)':'var(--red)';
+}
+
+function parseCSVLine(line) {
+  const r=[]; let cur=''; let inQ=false;
+  for(let i=0;i<line.length;i++) {
+    const c=line[i];
+    if(c==='"') { if(inQ&&line[i+1]==='"'){cur+='"';i++;}else inQ=!inQ; }
+    else if(c===','&&!inQ) { r.push(cur.trim()); cur=''; }
+    else cur+=c;
+  }
+  r.push(cur.trim()); return r;
+}
+function importFromText(text) {
+  const lines=text.trim().split('\n').filter(l=>l.trim());
+  if(lines.length<2) { showImportResult('error','File empty or invalid.'); return; }
+  const header=parseCSVLine(lines[0]).map(h=>h.toLowerCase().replace(/\s/g,''));
+  const col=k=>header.indexOf(k);
+  const iN=col('name'),iP=col('phone'),iB=col('birthday'),iS=col('stamps'),iJ=col('joined'),iR=col('pendingreward'),iI=col('id');
+  if(iN<0||iP<0) { showImportResult('error','Cannot find Name/Phone columns.'); return; }
+  const existing=getMembers();
+  const phones=new Set(existing.map(m=>m.phone.replace(/\s/g,'')));
+  let added=0,skipped=0,updated=0;
+  const newList=[...existing];
+  for(let i=1;i<lines.length;i++) {
+    const c=parseCSVLine(lines[i]);
+    if(c.length<2) continue;
+    const phone=(c[iP]||'').replace(/\s/g,'');
+    const name=c[iN]||'';
+    if(!name||!phone){skipped++;continue;}
+    const stamps=iS>=0?parseInt(c[iS])||0:0;
+    const idx=newList.findIndex(m=>m.phone.replace(/\s/g,'')===phone);
+    if(idx>=0) {
+      if(stamps>newList[idx].stamps){newList[idx].stamps=stamps;updated++;}else skipped++;
+    } else {
+      newList.push({id:iI>=0?c[iI]||Date.now().toString():Date.now().toString(),name,phone,
+        birthday:iB>=0?c[iB]||'':'',stamps,joinDate:iJ>=0?c[iJ]||'':'',pendingReward:iR>=0&&c[iR]?.toLowerCase()==='yes',history:[]});
+      added++;
+    }
+  }
+  saveMembers(newList);
+  renderTable(); renderStats(); renderTodayPanel();
+  showImportResult('success',`✅ Done: ${added} added, ${updated} updated, ${skipped} skipped`);
+  toast(`Imported! +${added} members`,3000);
+}
+function showImportResult(type,msg) {
+  const el=document.getElementById('import-result');
+  el.style.display='block';
+  el.style.background=type==='success'?'rgba(90,158,74,0.15)':'rgba(192,57,43,0.15)';
+  el.style.border=type==='success'?'1px solid rgba(90,158,74,0.4)':'1px solid rgba(192,57,43,0.4)';
+  el.style.color=type==='success'?'var(--primary)':'#e74c3c';
+  el.style.borderRadius='10px'; el.style.padding='12px 14px'; el.style.marginTop='12px';
+  el.style.fontWeight='700'; el.style.fontSize='0.87rem';
+  el.textContent=msg;
+}
+function importCSV(input) {
+  const file=input.files[0]; if(!file) return;
+  const r=new FileReader(); r.onload=e=>importFromText(e.target.result); r.readAsText(file);
+  input.value='';
+}
+function onDragOver(e) { e.preventDefault(); document.getElementById('drop-zone').style.borderColor='var(--primary)'; }
+function onDragLeave()  { document.getElementById('drop-zone').style.borderColor='var(--border)'; }
+function onDrop(e) {
+  e.preventDefault(); onDragLeave();
+  const file=e.dataTransfer.files[0];
+  if(!file||!file.name.endsWith('.csv')) { showImportResult('error','Please drop a .csv file.'); return; }
+  const r=new FileReader(); r.onload=ev=>importFromText(ev.target.result); r.readAsText(file);
+}
+function clearAll() {
+  if(!confirm('Delete ALL member data?')) return;
+  if(!confirm('Really? Cannot be undone.')) return;
+  localStorage.removeItem('topepopMembers');
+  renderTable(); renderStats(); renderTodayPanel(); toast('All data cleared');
+}
+
+/* ══ MODAL HELPERS ══ */
+function openModal(id)  { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+/* ══ TOAST ══ */
+function toast(msg, ms=2600) {
+  const el=document.getElementById('toast');
+  el.textContent=msg; el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'),ms);
+}
+</script>
+</body>
+</html>

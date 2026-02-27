@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Topepop Tea – Loyalty Rewards</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:      #f5f0e8;
+    --card:    #fffdf7;
+    --primary: #5a7a2e;
+    --primary2:#7da03a;
+    --amber:   #c8860a;
+    --amber2:  #e8a820;
+    --cream:   #f9f2de;
+    --brown:   #4a2e0a;
+    --text:    #2e2008;
+    --muted:   #8a7a5a;
+    --border:  #d4c89a;
+    --radius:  18px;
+    --shadow:  0 8px 32px rgba(90,122,46,0.13);
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body {
+    font-family:'Nunito',sans-serif;
+    background:var(--bg);
+    background-image:
+      radial-gradient(circle at 15% 10%, rgba(125,160,58,0.09) 0%, transparent 40%),
+      radial-gradient(circle at 85% 85%, rgba(200,134,10,0.09) 0%, transparent 40%);
+    min-height:100vh;
+    display:flex; flex-direction:column; align-items:center;
+    padding:28px 16px 80px;
+  }
+  .header { text-align:center; margin-bottom:24px; }
+  .logo-wrap {
+    width:108px; height:108px; border-radius:50%;
+    background:#fff; border:3px solid var(--border);
+    box-shadow:0 4px 20px rgba(90,122,46,0.18);
+    display:flex; align-items:center; justify-content:center;
+    margin:0 auto 12px; overflow:hidden;
+  }
+  .logo-wrap img { width:96px; height:96px; object-fit:contain; }
+  .shop-name { font-family:'Baloo 2',cursive; font-size:1.85rem; font-weight:800; color:var(--primary); letter-spacing:0.4px; line-height:1; }
+  .shop-name span { color:var(--amber); }
+  .tagline { color:var(--muted); font-size:0.88rem; margin-top:4px; }
+
+  .card {
+    background:var(--card); border:1.5px solid var(--border);
+    border-radius:var(--radius); box-shadow:var(--shadow);
+    padding:26px 22px; width:100%; max-width:420px; margin-bottom:18px;
+  }
+  .card h2 { font-family:'Baloo 2',cursive; font-size:1.2rem; font-weight:700; color:var(--primary); margin-bottom:16px; }
+
+  label { display:block; font-weight:700; font-size:0.85rem; color:var(--muted); margin-bottom:5px; text-transform:uppercase; letter-spacing:0.4px; }
+  input[type="text"], input[type="tel"], input[type="date"] {
+    width:100%; padding:13px 15px; border-radius:12px;
+    border:2px solid var(--border); background:var(--cream);
+    font-family:'Nunito',sans-serif; font-size:1rem; color:var(--text);
+    outline:none; transition:border 0.2s; margin-bottom:14px;
+  }
+  input:focus { border-color:var(--primary); }
+
+  .btn { display:block; width:100%; padding:14px; border:none; border-radius:14px; font-family:'Baloo 2',cursive; font-weight:700; font-size:1.1rem; cursor:pointer; transition:transform 0.12s, opacity 0.2s; }
+  .btn:hover  { opacity:0.88; transform:translateY(-1px); }
+  .btn:active { transform:scale(0.97); }
+  .btn-green { background:var(--primary); color:#fff; box-shadow:0 4px 16px rgba(90,122,46,0.28); }
+  .btn-amber { background:var(--amber2); color:var(--brown); box-shadow:0 4px 14px rgba(200,134,10,0.22); }
+
+  .stamps-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:9px; margin:14px 0 8px; }
+  .stamp { aspect-ratio:1; border-radius:50%; background:var(--cream); border:2px dashed var(--border); display:flex; align-items:center; justify-content:center; font-size:1.3rem; transition:all 0.25s; }
+  .stamp.filled { background:linear-gradient(135deg,var(--amber2),var(--amber)); border:2px solid var(--amber); box-shadow:0 2px 8px rgba(200,134,10,0.3); }
+  .stamp-count { text-align:center; color:var(--muted); font-size:0.87rem; margin-top:4px; font-weight:600; }
+
+  .member-info { display:flex; align-items:center; gap:14px; background:var(--cream); border-radius:14px; padding:14px 16px; margin-bottom:16px; border:1.5px solid var(--border); }
+  .avatar { width:48px; height:48px; border-radius:50%; background:var(--primary); display:flex; align-items:center; justify-content:center; font-family:'Baloo 2',cursive; font-size:1.4rem; color:#fff; flex-shrink:0; }
+  .member-name { font-weight:800; color:var(--text); font-size:1.05rem; }
+  .member-meta { color:var(--muted); font-size:0.82rem; margin-top:2px; }
+
+  .birthday-banner { background:linear-gradient(135deg,#f9a825,#e65100); color:#fff; border-radius:14px; padding:14px 18px; font-weight:800; text-align:center; font-size:1rem; margin-bottom:16px; display:none; animation:softpulse 2s ease-in-out infinite; box-shadow:0 4px 18px rgba(230,81,0,0.3); }
+  .reward-alert { background:linear-gradient(135deg,var(--primary2),var(--primary)); color:#fff; border-radius:14px; padding:16px 18px; font-weight:800; text-align:center; font-size:1rem; margin-bottom:16px; display:none; box-shadow:0 4px 18px rgba(90,122,46,0.3); }
+  @keyframes softpulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.015)} }
+
+  .info-box { background:var(--cream); border:1.5px solid var(--border); border-radius:12px; padding:12px 14px; font-size:0.87rem; color:var(--muted); margin-bottom:16px; line-height:1.55; }
+
+  /* Google review button — glows after tap */
+  .google-btn {
+    display:flex; align-items:center; justify-content:center; gap:10px;
+    background:#fff; border:1.5px solid var(--border); color:var(--muted);
+    padding:12px; border-radius:12px; cursor:pointer;
+    font-family:'Nunito',sans-serif; font-weight:700; font-size:0.93rem;
+    text-decoration:none; transition:all 0.3s; margin-top:10px;
+  }
+  .google-btn:hover { border-color:#4285f4; color:#4285f4; }
+  .google-btn.tapped { border-color:#34a853; color:#34a853; background:#f0fff4; }
+
+  /* Thank-you overlay after review tap */
+  .review-thanks {
+    display:none; margin-top:10px;
+    background:linear-gradient(135deg,#e8f5e9,#f1f8e9);
+    border:1.5px solid #a5d6a7; border-radius:12px;
+    padding:14px 16px; text-align:center;
+    font-weight:700; color:#2e7d32; font-size:0.92rem;
+    animation:fadeIn 0.4s ease;
+  }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+
+  .divider { border:none; border-top:2px dashed var(--border); margin:18px 0; }
+  #step-result, #step-register { display:none; width:100%; max-width:420px; }
+  #step-lookup { width:100%; max-width:420px; }
+  .back-link { color:var(--primary); font-weight:700; cursor:pointer; font-size:0.9rem; margin-bottom:12px; display:inline-block; }
+  .back-link:hover { text-decoration:underline; }
+  .admin-link { margin-top:6px; color:var(--muted); font-size:0.78rem; text-align:center; }
+  .admin-link a { color:var(--amber); font-weight:700; text-decoration:none; }
+
+  .toast { position:fixed; bottom:28px; left:50%; transform:translateX(-50%) translateY(80px); background:var(--brown); color:#fff; padding:11px 24px; border-radius:30px; font-size:0.92rem; font-weight:700; transition:transform 0.3s; z-index:999; white-space:nowrap; }
+  .toast.show { transform:translateX(-50%) translateY(0); }
+  .leaf { position:fixed; opacity:0.05; pointer-events:none; font-size:8rem; }
+  .leaf.tl { top:-10px; left:-10px; transform:rotate(-30deg); }
+  .leaf.br { bottom:-10px; right:-10px; transform:rotate(150deg); }
+</style>
+</head>
+<body>
+<div class="leaf tl">🌿</div>
+<div class="leaf br">🌿</div>
+
+<div class="header">
+  <div class="logo-wrap"><img src="logo.png" alt="Topepop Tea"></div>
+  <div class="shop-name">Topepop <span>Tea</span></div>
+  <div class="tagline">Werribee · Sip, Stamp &amp; Earn Rewards 🧋</div>
+</div>
+
+<!-- STEP 1: Lookup -->
+<div id="step-lookup">
+  <div class="card">
+    <h2>👋 Welcome Back!</h2>
+    <label for="phone-input">Your phone number</label>
+    <input type="tel" id="phone-input" placeholder="e.g. 0412 345 678" maxlength="15">
+    <button class="btn btn-green" onclick="lookupMember()">Check My Rewards 🔍</button>
+    <div class="divider"></div>
+    <button class="btn btn-amber" onclick="showRegister()">New here? Join free 📝</button>
+  </div>
+  <div class="admin-link">Staff: <a href="admin.html">Admin Panel →</a></div>
+</div>
+
+<!-- STEP 2: Result -->
+<div id="step-result">
+  <span class="back-link" onclick="goBack()">← Back</span>
+  <div class="birthday-banner" id="birthday-banner">
+    🎂 Happy Birthday, <span id="bday-name"></span>!<br>
+    Tell our staff for your birthday surprise! 🎁
+  </div>
+  <div class="reward-alert" id="reward-alert">
+    🎉 You earned a FREE DRINK!<br>Show this to our staff to claim it! 🧋
+  </div>
+  <div class="card">
+    <div class="member-info">
+      <div class="avatar" id="member-avatar">?</div>
+      <div>
+        <div class="member-name" id="member-name-display">—</div>
+        <div class="member-meta"  id="member-meta">—</div>
+      </div>
+    </div>
+    <h2>🧋 Your Stamp Card</h2>
+    <div class="stamps-grid" id="stamps-grid"></div>
+    <div class="stamp-count"   id="stamp-count-text"></div>
+    <div class="divider"></div>
+    <div class="info-box">
+      📱 <strong>Show this screen to our staff</strong> after each purchase to get your stamp.<br>
+      Collect <strong>10 stamps</strong> = <strong>1 free drink</strong>! 🎉
+    </div>
+    <a id="google-btn" href="#" target="_blank" class="google-btn" onclick="onReviewTap()">
+      <img width="20" height="20" src="https://www.google.com/favicon.ico" alt="G">
+      Leave us a Google Review ⭐
+    </a>
+    <div class="review-thanks" id="review-thanks">
+      🙏 Thank you so much! Your review means the world to us! 💚
+    </div>
+  </div>
+</div>
+
+<!-- STEP 3: Register -->
+<div id="step-register">
+  <span class="back-link" onclick="goBack()">← Back</span>
+  <div class="card">
+    <h2>📝 Join the Rewards Club</h2>
+    <label>Full Name</label>
+    <input type="text" id="reg-name" placeholder="Your name">
+    <label>Phone Number</label>
+    <input type="tel"  id="reg-phone" placeholder="0412 345 678" maxlength="15">
+    <label>Birthday 🎂 — unlock a birthday surprise!</label>
+    <input type="date" id="reg-birthday">
+    <button class="btn btn-green" onclick="registerMember()">Join &amp; Start Earning! 🎉</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const STAMPS = 10;
+const DEFAULT_GURL = "https://g.page/r/YOUR_TOPEPOP_REVIEW_LINK";
+
+const getMembers  = ()   => JSON.parse(localStorage.getItem('topepopMembers') || '[]');
+const saveMembers = list => localStorage.setItem('topepopMembers', JSON.stringify(list));
+const getSettings = ()   => JSON.parse(localStorage.getItem('topepopSettings') || '{}');
+
+let currentMemberId = null;
+
+function byPhone(p) {
+  const clean = s => s.replace(/\s/g,'');
+  return getMembers().find(m => clean(m.phone) === clean(p));
+}
+function isBday(s) {
+  if (!s) return false;
+  const t=new Date(), b=new Date(s);
+  return b.getMonth()===t.getMonth() && b.getDate()===t.getDate();
+}
+function fmtDate(s) {
+  if (!s) return '—';
+  return new Date(s).toLocaleDateString('en-AU',{year:'numeric',month:'short',day:'numeric'});
+}
+
+function showStep(id) {
+  ['step-lookup','step-result','step-register'].forEach(x =>
+    document.getElementById(x).style.display = x===id ? 'block' : 'none');
+}
+function goBack() { showStep('step-lookup'); document.getElementById('phone-input').value=''; currentMemberId=null; }
+function showRegister() {
+  document.getElementById('reg-phone').value = document.getElementById('phone-input').value.trim();
+  showStep('step-register');
+}
+
+function lookupMember() {
+  const phone = document.getElementById('phone-input').value.trim();
+  if (!phone) { toast('Please enter your phone number 📱'); return; }
+  const m = byPhone(phone);
+  if (!m) {
+    toast("No account found — let's register you! 👇");
+    document.getElementById('reg-phone').value = phone;
+    showStep('step-register');
+    return;
+  }
+  renderResult(m);
+}
+
+function renderResult(m) {
+  currentMemberId = m.id;
+  const s = getSettings();
+  const gUrl = s.googleUrl || DEFAULT_GURL;
+  document.getElementById('member-avatar').textContent = m.name.charAt(0).toUpperCase();
+  document.getElementById('member-name-display').textContent = m.name;
+  document.getElementById('member-meta').textContent = `Member since ${fmtDate(m.joinDate)} · ${m.stamps} stamps total`;
+  document.getElementById('google-btn').href = gUrl;
+  document.getElementById('google-btn').classList.remove('tapped');
+  document.getElementById('review-thanks').style.display = 'none';
+
+  const cur = m.stamps % STAMPS;
+  const grid = document.getElementById('stamps-grid');
+  grid.innerHTML = '';
+  for (let i=0;i<STAMPS;i++) {
+    const d = document.createElement('div');
+    d.className = 'stamp'+(i<cur?' filled':'');
+    d.textContent = i<cur ? '🧋' : '';
+    grid.appendChild(d);
+  }
+  document.getElementById('stamp-count-text').textContent = `${cur} / ${STAMPS} stamps this round`;
+  document.getElementById('birthday-banner').style.display = isBday(m.birthday) ? 'block' : 'none';
+  document.getElementById('bday-name').textContent = m.name.split(' ')[0];
+  document.getElementById('reward-alert').style.display =
+    (m.stamps>0 && m.stamps%STAMPS===0 && m.pendingReward) ? 'block' : 'none';
+  showStep('step-result');
+}
+
+function registerMember() {
+  const name     = document.getElementById('reg-name').value.trim();
+  const phone    = document.getElementById('reg-phone').value.trim();
+  const birthday = document.getElementById('reg-birthday').value;
+  if (!name||!phone) { toast('Please fill in your name and phone 😊'); return; }
+  if (byPhone(phone)) { toast('Phone already registered! Try checking in.'); return; }
+
+  const list = getMembers();
+  const nm = {
+    id: Date.now().toString(), name, phone, birthday,
+    stamps:0, joinDate:new Date().toISOString().split('T')[0],
+    pendingReward:false, history:[]
+  };
+  list.push(nm);
+  saveMembers(list);
+
+  // ── NOTIFY ADMIN: new signup ──
+  notifyAdmin('signup', { name, phone });
+
+  toast(`Welcome to Topepop Tea, ${name}! 🎉`);
+  renderResult(nm);
+}
+
+// ── Called when customer taps Google Review button ──
+function onReviewTap() {
+  const members = getMembers();
+  const m = members.find(x => x.id === currentMemberId);
+  const name = m ? m.name : 'A customer';
+
+  // Visual feedback for customer
+  setTimeout(() => {
+    document.getElementById('google-btn').classList.add('tapped');
+    document.getElementById('review-thanks').style.display = 'block';
+  }, 300);
+
+  // ── NOTIFY ADMIN: review tapped ──
+  notifyAdmin('review', { name });
+}
+
+// ── Write an event to localStorage so admin page picks it up ──
+function notifyAdmin(type, data) {
+  const event = {
+    type,           // 'signup' | 'review'
+    data,
+    time: new Date().toISOString(),
+    id: Date.now().toString()
+  };
+  // Push to notifications queue
+  const queue = JSON.parse(localStorage.getItem('topepopNotifications') || '[]');
+  queue.push(event);
+  // Keep last 50 only
+  if (queue.length > 50) queue.splice(0, queue.length - 50);
+  localStorage.setItem('topepopNotifications', JSON.stringify(queue));
+
+  // Also write a "latest" key — storage event fires on OTHER tabs/windows
+  localStorage.setItem('topepopLatestNotif', JSON.stringify(event));
+}
+
+function toast(msg, ms=2800) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'), ms);
+}
+
+showStep('step-lookup');
+</script>
+</body>
+</html>
