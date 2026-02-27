@@ -181,6 +181,7 @@
     <label>Staff Password</label>
     <input type="password" id="login-pass" placeholder="Enter password" onkeydown="if(event.key==='Enter')doLogin()">
     <button class="btn primary block" onclick="doLogin()">Login →</button>
+    <div style="margin-top:12px;font-size:0.78rem;color:var(--muted)">Default: <strong style="color:var(--amber)">boba1234</strong></div>
   </div>
 </div>
 
@@ -234,7 +235,7 @@
     <div class="qr-box">
       <p>📱 Print this QR code and place it at your counter</p>
       <div id="qr-gen"></div>
-      <div style="margin-top:10px;font-size:0.76rem;color:var(--muted)">Points to: <span id="qr-url-label" style="color:var(--primary)">—</span></div>
+      <div id="qr-url-label" style="display:none"></div>
       <div style="margin-top:12px"><button class="btn amber sm" onclick="window.print()">🖨️ Print QR</button></div>
     </div>
 
@@ -341,6 +342,7 @@ let activeMember  = null;
 let unreadNotifs  = 0;
 let lastNotifId   = null;
 let lastPollId    = null;
+let onlineChecked = false;
 
 // ── Storage ──
 const getMembers        = ()   => JSON.parse(localStorage.getItem('topepopMembers')  || '[]');
@@ -608,35 +610,18 @@ async function redeemRewardModal() {
   refreshStampModal();
 }
 
-// ── Core stamp logic ──
+// ── Core stamp logic — local first, sync in background ──
 async function doAddStamp(id) {
   let list=getMembers();
   const i=list.findIndex(m=>m.id===id);if(i<0)return;
 
-  setSyncStatus('syncing','Saving stamp…');
-  let sheetOk=false;
-  let earnedReward=false;
-
-  try {
-    const r=await api('addStamp',{phone:list[i].phone});
-    if(r.ok){
-      sheetOk=true;
-      // Use server's updated member data
-      list[i]={...list[i],...r.member};
-      earnedReward=r.earnedReward;
-    }
-  } catch(e){}
-
-  // Local fallback
-  if(!sheetOk){
-    list[i].stamps++;
-    list[i].history=list[i].history||[];
-    list[i].history.push({date:new Date().toISOString(),action:'stamp'});
-    if(list[i].stamps%STAMPS===0){list[i].pendingReward=true;earnedReward=true;}
-  }
-
+  // ── Save locally IMMEDIATELY — no waiting ──
+  list[i].stamps++;
+  list[i].history=list[i].history||[];
+  list[i].history.push({date:new Date().toISOString(),action:'stamp'});
+  const earnedReward = list[i].stamps%STAMPS===0;
+  if(earnedReward) list[i].pendingReward=true;
   saveMembers(list);
-  setSyncStatus(sheetOk?'online':'offline',sheetOk?'Synced ✓':'Saved locally');
 
   if(earnedReward){
     playSound('reward');
@@ -646,6 +631,19 @@ async function doAddStamp(id) {
     toast(`Stamp! ${list[i].stamps%STAMPS}/${STAMPS} for ${list[i].name.split(' ')[0]}`);
   }
   renderTable(); renderStats();
+
+  // ── Sync to Sheets in background (no blocking) ──
+  const phone=list[i].phone;
+  const url=getScriptUrl();
+  if(url) {
+    try {
+      const r=await Promise.race([
+        api('addStamp',{phone}),
+        new Promise((_,rej)=>setTimeout(()=>rej(),8000))
+      ]);
+      if(r.ok) setSyncStatus('online','Synced ✓');
+    } catch(e){ setSyncStatus('offline','Saved locally'); }
+  }
 }
 
 async function doRedeemReward(id) {
