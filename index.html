@@ -10,117 +10,87 @@
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg:      #f5f0e8;
-    --card:    #fffdf7;
-    --primary: #5a7a2e;
-    --primary2:#7da03a;
-    --amber:   #c8860a;
-    --amber2:  #e8a820;
-    --cream:   #f9f2de;
-    --brown:   #4a2e0a;
-    --text:    #2e2008;
-    --muted:   #8a7a5a;
-    --border:  #d4c89a;
-    --radius:  18px;
-    --shadow:  0 8px 32px rgba(90,122,46,0.13);
+    --bg:#f5f0e8; --card:#fffdf7; --primary:#5a7a2e; --primary2:#7da03a;
+    --amber:#c8860a; --amber2:#e8a820; --cream:#f9f2de; --brown:#4a2e0a;
+    --text:#2e2008; --muted:#8a7a5a; --border:#d4c89a; --radius:18px;
+    --shadow:0 8px 32px rgba(90,122,46,0.13);
   }
   * { box-sizing:border-box; margin:0; padding:0; }
   body {
-    font-family:'Nunito',sans-serif;
-    background:var(--bg);
-    background-image:
-      radial-gradient(circle at 15% 10%, rgba(125,160,58,0.09) 0%, transparent 40%),
-      radial-gradient(circle at 85% 85%, rgba(200,134,10,0.09) 0%, transparent 40%);
-    min-height:100vh;
-    display:flex; flex-direction:column; align-items:center;
-    padding:28px 16px 80px;
+    font-family:'Nunito',sans-serif; background:var(--bg);
+    background-image:radial-gradient(circle at 15% 10%,rgba(125,160,58,0.09) 0%,transparent 40%),
+      radial-gradient(circle at 85% 85%,rgba(200,134,10,0.09) 0%,transparent 40%);
+    min-height:100vh; display:flex; flex-direction:column; align-items:center; padding:28px 16px 80px;
   }
   .header { text-align:center; margin-bottom:24px; }
-  .logo-wrap {
-    width:108px; height:108px; border-radius:50%;
-    background:#fff; border:3px solid var(--border);
-    box-shadow:0 4px 20px rgba(90,122,46,0.18);
-    display:flex; align-items:center; justify-content:center;
-    margin:0 auto 12px; overflow:hidden;
-  }
-  .logo-wrap img { width:96px; height:96px; object-fit:contain; }
-  .shop-name { font-family:'Baloo 2',cursive; font-size:1.85rem; font-weight:800; color:var(--primary); letter-spacing:0.4px; line-height:1; }
+  .logo-wrap { width:108px;height:108px;border-radius:50%;background:#fff;border:3px solid var(--border);box-shadow:0 4px 20px rgba(90,122,46,0.18);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;overflow:hidden; }
+  .logo-wrap img { width:96px;height:96px;object-fit:contain; }
+  .shop-name { font-family:'Baloo 2',cursive;font-size:1.85rem;font-weight:800;color:var(--primary);letter-spacing:0.4px;line-height:1; }
   .shop-name span { color:var(--amber); }
-  .tagline { color:var(--muted); font-size:0.88rem; margin-top:4px; }
+  .tagline { color:var(--muted);font-size:0.88rem;margin-top:4px; }
 
-  .card {
-    background:var(--card); border:1.5px solid var(--border);
-    border-radius:var(--radius); box-shadow:var(--shadow);
-    padding:26px 22px; width:100%; max-width:420px; margin-bottom:18px;
-  }
-  .card h2 { font-family:'Baloo 2',cursive; font-size:1.2rem; font-weight:700; color:var(--primary); margin-bottom:16px; }
+  .card { background:var(--card);border:1.5px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:26px 22px;width:100%;max-width:420px;margin-bottom:18px; }
+  .card h2 { font-family:'Baloo 2',cursive;font-size:1.2rem;font-weight:700;color:var(--primary);margin-bottom:16px; }
 
-  label { display:block; font-weight:700; font-size:0.85rem; color:var(--muted); margin-bottom:5px; text-transform:uppercase; letter-spacing:0.4px; }
-  input[type="text"], input[type="tel"], input[type="date"] {
-    width:100%; padding:13px 15px; border-radius:12px;
-    border:2px solid var(--border); background:var(--cream);
-    font-family:'Nunito',sans-serif; font-size:1rem; color:var(--text);
-    outline:none; transition:border 0.2s; margin-bottom:14px;
-  }
+  label { display:block;font-weight:700;font-size:0.85rem;color:var(--muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:0.4px; }
+  input[type="text"],input[type="tel"],input[type="date"] { width:100%;padding:13px 15px;border-radius:12px;border:2px solid var(--border);background:var(--cream);font-family:'Nunito',sans-serif;font-size:1rem;color:var(--text);outline:none;transition:border 0.2s;margin-bottom:14px; }
   input:focus { border-color:var(--primary); }
 
-  .btn { display:block; width:100%; padding:14px; border:none; border-radius:14px; font-family:'Baloo 2',cursive; font-weight:700; font-size:1.1rem; cursor:pointer; transition:transform 0.12s, opacity 0.2s; }
-  .btn:hover  { opacity:0.88; transform:translateY(-1px); }
+  .btn { display:block;width:100%;padding:14px;border:none;border-radius:14px;font-family:'Baloo 2',cursive;font-weight:700;font-size:1.1rem;cursor:pointer;transition:transform 0.12s,opacity 0.2s; }
+  .btn:hover { opacity:0.88;transform:translateY(-1px); }
   .btn:active { transform:scale(0.97); }
-  .btn-green { background:var(--primary); color:#fff; box-shadow:0 4px 16px rgba(90,122,46,0.28); }
-  .btn-amber { background:var(--amber2); color:var(--brown); box-shadow:0 4px 14px rgba(200,134,10,0.22); }
+  .btn-green { background:var(--primary);color:#fff;box-shadow:0 4px 16px rgba(90,122,46,0.28); }
+  .btn-amber { background:var(--amber2);color:var(--brown);box-shadow:0 4px 14px rgba(200,134,10,0.22); }
+  .btn:disabled { opacity:0.5;cursor:not-allowed;transform:none; }
 
-  .stamps-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:9px; margin:14px 0 8px; }
-  .stamp { aspect-ratio:1; border-radius:50%; background:var(--cream); border:2px dashed var(--border); display:flex; align-items:center; justify-content:center; font-size:1.3rem; transition:all 0.25s; }
-  .stamp.filled { background:linear-gradient(135deg,var(--amber2),var(--amber)); border:2px solid var(--amber); box-shadow:0 2px 8px rgba(200,134,10,0.3); }
-  .stamp-count { text-align:center; color:var(--muted); font-size:0.87rem; margin-top:4px; font-weight:600; }
+  .stamps-grid { display:grid;grid-template-columns:repeat(5,1fr);gap:9px;margin:14px 0 8px; }
+  .stamp { aspect-ratio:1;border-radius:50%;background:var(--cream);border:2px dashed var(--border);display:flex;align-items:center;justify-content:center;font-size:1.3rem;transition:all 0.25s; }
+  .stamp.filled { background:linear-gradient(135deg,var(--amber2),var(--amber));border:2px solid var(--amber);box-shadow:0 2px 8px rgba(200,134,10,0.3); }
+  .stamp-count { text-align:center;color:var(--muted);font-size:0.87rem;margin-top:4px;font-weight:600; }
 
-  .member-info { display:flex; align-items:center; gap:14px; background:var(--cream); border-radius:14px; padding:14px 16px; margin-bottom:16px; border:1.5px solid var(--border); }
-  .avatar { width:48px; height:48px; border-radius:50%; background:var(--primary); display:flex; align-items:center; justify-content:center; font-family:'Baloo 2',cursive; font-size:1.4rem; color:#fff; flex-shrink:0; }
-  .member-name { font-weight:800; color:var(--text); font-size:1.05rem; }
-  .member-meta { color:var(--muted); font-size:0.82rem; margin-top:2px; }
+  .member-info { display:flex;align-items:center;gap:14px;background:var(--cream);border-radius:14px;padding:14px 16px;margin-bottom:16px;border:1.5px solid var(--border); }
+  .avatar { width:48px;height:48px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;font-family:'Baloo 2',cursive;font-size:1.4rem;color:#fff;flex-shrink:0; }
+  .member-name { font-weight:800;color:var(--text);font-size:1.05rem; }
+  .member-meta { color:var(--muted);font-size:0.82rem;margin-top:2px; }
 
-  .birthday-banner { background:linear-gradient(135deg,#f9a825,#e65100); color:#fff; border-radius:14px; padding:14px 18px; font-weight:800; text-align:center; font-size:1rem; margin-bottom:16px; display:none; animation:softpulse 2s ease-in-out infinite; box-shadow:0 4px 18px rgba(230,81,0,0.3); }
-  .reward-alert { background:linear-gradient(135deg,var(--primary2),var(--primary)); color:#fff; border-radius:14px; padding:16px 18px; font-weight:800; text-align:center; font-size:1rem; margin-bottom:16px; display:none; box-shadow:0 4px 18px rgba(90,122,46,0.3); }
+  .birthday-banner { background:linear-gradient(135deg,#f9a825,#e65100);color:#fff;border-radius:14px;padding:14px 18px;font-weight:800;text-align:center;font-size:1rem;margin-bottom:16px;display:none;animation:softpulse 2s ease-in-out infinite;box-shadow:0 4px 18px rgba(230,81,0,0.3); }
+  .reward-alert { background:linear-gradient(135deg,var(--primary2),var(--primary));color:#fff;border-radius:14px;padding:16px 18px;font-weight:800;text-align:center;font-size:1rem;margin-bottom:16px;display:none;box-shadow:0 4px 18px rgba(90,122,46,0.3); }
   @keyframes softpulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.015)} }
 
-  .info-box { background:var(--cream); border:1.5px solid var(--border); border-radius:12px; padding:12px 14px; font-size:0.87rem; color:var(--muted); margin-bottom:16px; line-height:1.55; }
+  .info-box { background:var(--cream);border:1.5px solid var(--border);border-radius:12px;padding:12px 14px;font-size:0.87rem;color:var(--muted);margin-bottom:16px;line-height:1.55; }
 
-  /* Google review button — glows after tap */
-  .google-btn {
-    display:flex; align-items:center; justify-content:center; gap:10px;
-    background:#fff; border:1.5px solid var(--border); color:var(--muted);
-    padding:12px; border-radius:12px; cursor:pointer;
-    font-family:'Nunito',sans-serif; font-weight:700; font-size:0.93rem;
-    text-decoration:none; transition:all 0.3s; margin-top:10px;
-  }
-  .google-btn:hover { border-color:#4285f4; color:#4285f4; }
-  .google-btn.tapped { border-color:#34a853; color:#34a853; background:#f0fff4; }
-
-  /* Thank-you overlay after review tap */
-  .review-thanks {
-    display:none; margin-top:10px;
-    background:linear-gradient(135deg,#e8f5e9,#f1f8e9);
-    border:1.5px solid #a5d6a7; border-radius:12px;
-    padding:14px 16px; text-align:center;
-    font-weight:700; color:#2e7d32; font-size:0.92rem;
-    animation:fadeIn 0.4s ease;
-  }
+  .google-btn { display:flex;align-items:center;justify-content:center;gap:10px;background:#fff;border:1.5px solid var(--border);color:var(--muted);padding:12px;border-radius:12px;cursor:pointer;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.93rem;text-decoration:none;transition:all 0.3s;margin-top:10px; }
+  .google-btn:hover { border-color:#4285f4;color:#4285f4; }
+  .google-btn.tapped { border-color:#34a853;color:#34a853;background:#f0fff4; }
+  .review-thanks { display:none;margin-top:10px;background:linear-gradient(135deg,#e8f5e9,#f1f8e9);border:1.5px solid #a5d6a7;border-radius:12px;padding:14px 16px;text-align:center;font-weight:700;color:#2e7d32;font-size:0.92rem;animation:fadeIn 0.4s ease; }
   @keyframes fadeIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
 
-  .divider { border:none; border-top:2px dashed var(--border); margin:18px 0; }
-  #step-result, #step-register { display:none; width:100%; max-width:420px; }
-  #step-lookup { width:100%; max-width:420px; }
-  .back-link { color:var(--primary); font-weight:700; cursor:pointer; font-size:0.9rem; margin-bottom:12px; display:inline-block; }
-  .back-link:hover { text-decoration:underline; }
-  .admin-link { margin-top:6px; color:var(--muted); font-size:0.78rem; text-align:center; }
-  .admin-link a { color:var(--amber); font-weight:700; text-decoration:none; }
+  /* Sync status pill */
+  .sync-pill { display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:0.75rem;font-weight:700;margin-bottom:14px; }
+  .sync-pill.online  { background:#e8f5e9;color:#2e7d32;border:1px solid #a5d6a7; }
+  .sync-pill.offline { background:#fff3e0;color:#e65100;border:1px solid #ffcc80; }
+  .sync-pill.syncing { background:#e3f2fd;color:#1565c0;border:1px solid #90caf9; }
+  .sync-dot { width:7px;height:7px;border-radius:50%; }
+  .online  .sync-dot { background:#34a853; }
+  .offline .sync-dot { background:#e65100; }
+  .syncing .sync-dot { background:#1565c0;animation:blink 0.8s infinite; }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
 
-  .toast { position:fixed; bottom:28px; left:50%; transform:translateX(-50%) translateY(80px); background:var(--brown); color:#fff; padding:11px 24px; border-radius:30px; font-size:0.92rem; font-weight:700; transition:transform 0.3s; z-index:999; white-space:nowrap; }
+  .divider { border:none;border-top:2px dashed var(--border);margin:18px 0; }
+  #step-result,#step-register { display:none;width:100%;max-width:420px; }
+  #step-lookup { width:100%;max-width:420px; }
+  .back-link { color:var(--primary);font-weight:700;cursor:pointer;font-size:0.9rem;margin-bottom:12px;display:inline-block; }
+  .back-link:hover { text-decoration:underline; }
+  .admin-link { margin-top:6px;color:var(--muted);font-size:0.78rem;text-align:center; }
+  .admin-link a { color:var(--amber);font-weight:700;text-decoration:none; }
+  .toast { position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--brown);color:#fff;padding:11px 24px;border-radius:30px;font-size:0.92rem;font-weight:700;transition:transform 0.3s;z-index:999;white-space:nowrap; }
   .toast.show { transform:translateX(-50%) translateY(0); }
-  .leaf { position:fixed; opacity:0.05; pointer-events:none; font-size:8rem; }
-  .leaf.tl { top:-10px; left:-10px; transform:rotate(-30deg); }
-  .leaf.br { bottom:-10px; right:-10px; transform:rotate(150deg); }
+  .leaf { position:fixed;opacity:0.05;pointer-events:none;font-size:8rem; }
+  .leaf.tl { top:-10px;left:-10px;transform:rotate(-30deg); }
+  .leaf.br { bottom:-10px;right:-10px;transform:rotate(150deg); }
+
+  /* Offline notice */
+  .offline-notice { background:#fff3e0;border:1.5px solid #ffcc80;border-radius:12px;padding:10px 14px;font-size:0.82rem;color:#e65100;margin-bottom:14px;display:none; }
 </style>
 </head>
 <body>
@@ -133,29 +103,28 @@
   <div class="tagline">Werribee · Sip, Stamp &amp; Earn Rewards 🧋</div>
 </div>
 
-<!-- STEP 1: Lookup -->
+<!-- STEP 1 -->
 <div id="step-lookup">
   <div class="card">
     <h2>👋 Welcome Back!</h2>
+    <div id="sync-status" class="sync-pill offline"><div class="sync-dot"></div><span id="sync-label">Offline mode</span></div>
+    <div class="offline-notice" id="offline-notice">
+      ⚠️ No internet — using saved data on this device. Changes will sync when back online.
+    </div>
     <label for="phone-input">Your phone number</label>
     <input type="tel" id="phone-input" placeholder="e.g. 0412 345 678" maxlength="15">
-    <button class="btn btn-green" onclick="lookupMember()">Check My Rewards 🔍</button>
+    <button class="btn btn-green" id="lookup-btn" onclick="lookupMember()">Check My Rewards 🔍</button>
     <div class="divider"></div>
     <button class="btn btn-amber" onclick="showRegister()">New here? Join free 📝</button>
   </div>
   <div class="admin-link">Staff: <a href="admin.html">Admin Panel →</a></div>
 </div>
 
-<!-- STEP 2: Result -->
+<!-- STEP 2 -->
 <div id="step-result">
   <span class="back-link" onclick="goBack()">← Back</span>
-  <div class="birthday-banner" id="birthday-banner">
-    🎂 Happy Birthday, <span id="bday-name"></span>!<br>
-    Tell our staff for your birthday surprise! 🎁
-  </div>
-  <div class="reward-alert" id="reward-alert">
-    🎉 You earned a FREE DRINK!<br>Show this to our staff to claim it! 🧋
-  </div>
+  <div class="birthday-banner" id="birthday-banner">🎂 Happy Birthday, <span id="bday-name"></span>!<br>Tell our staff for your birthday surprise! 🎁</div>
+  <div class="reward-alert" id="reward-alert">🎉 You earned a FREE DRINK!<br>Show this to our staff to claim it! 🧋</div>
   <div class="card">
     <div class="member-info">
       <div class="avatar" id="member-avatar">?</div>
@@ -168,21 +137,16 @@
     <div class="stamps-grid" id="stamps-grid"></div>
     <div class="stamp-count"   id="stamp-count-text"></div>
     <div class="divider"></div>
-    <div class="info-box">
-      📱 <strong>Show this screen to our staff</strong> after each purchase to get your stamp.<br>
-      Collect <strong>10 stamps</strong> = <strong>1 free drink</strong>! 🎉
-    </div>
+    <div class="info-box">📱 <strong>Show this screen to our staff</strong> after each purchase.<br>Collect <strong>10 stamps</strong> = <strong>1 free drink</strong>! 🎉</div>
     <a id="google-btn" href="#" target="_blank" class="google-btn" onclick="onReviewTap()">
       <img width="20" height="20" src="https://www.google.com/favicon.ico" alt="G">
       Leave us a Google Review ⭐
     </a>
-    <div class="review-thanks" id="review-thanks">
-      🙏 Thank you so much! Your review means the world to us! 💚
-    </div>
+    <div class="review-thanks" id="review-thanks">🙏 Thank you so much! Your review means the world to us! 💚</div>
   </div>
 </div>
 
-<!-- STEP 3: Register -->
+<!-- STEP 3 -->
 <div id="step-register">
   <span class="back-link" onclick="goBack()">← Back</span>
   <div class="card">
@@ -193,25 +157,66 @@
     <input type="tel"  id="reg-phone" placeholder="0412 345 678" maxlength="15">
     <label>Birthday 🎂 — unlock a birthday surprise!</label>
     <input type="date" id="reg-birthday">
-    <button class="btn btn-green" onclick="registerMember()">Join &amp; Start Earning! 🎉</button>
+    <button class="btn btn-green" id="reg-btn" onclick="registerMember()">Join &amp; Start Earning! 🎉</button>
   </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
-const STAMPS = 10;
+// ══════════════════════════════════════
+// CONFIG — paste your Apps Script URL here after setup
+// ══════════════════════════════════════
+const SCRIPT_URL   = "YOUR_APPS_SCRIPT_URL_HERE"; // ← replace after Step 4 in guide
+const STAMPS       = 10;
 const DEFAULT_GURL = "https://g.page/r/YOUR_TOPEPOP_REVIEW_LINK";
 
-const getMembers  = ()   => JSON.parse(localStorage.getItem('topepopMembers') || '[]');
-const saveMembers = list => localStorage.setItem('topepopMembers', JSON.stringify(list));
-const getSettings = ()   => JSON.parse(localStorage.getItem('topepopSettings') || '{}');
+// ── Local cache (fallback when offline) ──
+const cache = {
+  get:  ()     => JSON.parse(localStorage.getItem('topepopMembers') || '[]'),
+  save: list   => localStorage.setItem('topepopMembers', JSON.stringify(list)),
+  getSettings: ()  => JSON.parse(localStorage.getItem('topepopSettings') || '{}'),
+};
 
 let currentMemberId = null;
+let isOnline = false;
 
-function byPhone(p) {
+// ── Sync helpers ──
+async function api(action, data = {}) {
+  const res = await fetch(SCRIPT_URL, {
+    method: 'POST',
+    body: JSON.stringify({ action, ...data }),
+  });
+  return res.json();
+}
+
+async function checkOnline() {
+  if (SCRIPT_URL === "YOUR_APPS_SCRIPT_URL_HERE") {
+    setSyncStatus('offline', 'Setup needed');
+    return false;
+  }
+  try {
+    const r = await Promise.race([
+      fetch(SCRIPT_URL, { method:'POST', body: JSON.stringify({ action:'getAll' }) }),
+      new Promise((_,rej) => setTimeout(() => rej('timeout'), 4000))
+    ]);
+    isOnline = r.ok;
+  } catch { isOnline = false; }
+  setSyncStatus(isOnline ? 'online' : 'offline', isOnline ? 'Synced to Google Sheets ✓' : 'Offline — local mode');
+  document.getElementById('offline-notice').style.display = isOnline ? 'none' : 'block';
+  return isOnline;
+}
+
+function setSyncStatus(type, label) {
+  const el = document.getElementById('sync-status');
+  el.className = `sync-pill ${type}`;
+  document.getElementById('sync-label').textContent = label;
+}
+
+// ── Member lookup ──
+function byPhone(list, p) {
   const clean = s => s.replace(/\s/g,'');
-  return getMembers().find(m => clean(m.phone) === clean(p));
+  return list.find(m => clean(m.phone) === clean(p));
 }
 function isBday(s) {
   if (!s) return false;
@@ -233,23 +238,48 @@ function showRegister() {
   showStep('step-register');
 }
 
-function lookupMember() {
+async function lookupMember() {
   const phone = document.getElementById('phone-input').value.trim();
   if (!phone) { toast('Please enter your phone number 📱'); return; }
-  const m = byPhone(phone);
-  if (!m) {
+
+  setLoading('lookup-btn', true);
+  setSyncStatus('syncing', 'Looking up…');
+
+  let member = null;
+
+  if (await checkOnline()) {
+    try {
+      const r = await api('getMember', { phone });
+      if (r.ok) {
+        member = r.member;
+        // Update local cache
+        const list = cache.get();
+        const idx = list.findIndex(m => m.phone.replace(/\s/g,'') === phone.replace(/\s/g,''));
+        if (idx >= 0) list[idx] = member; else list.push(member);
+        cache.save(list);
+      }
+    } catch(e) { isOnline = false; }
+  }
+
+  // Fallback to local cache
+  if (!member) member = byPhone(cache.get(), phone);
+
+  setLoading('lookup-btn', false);
+
+  if (!member) {
     toast("No account found — let's register you! 👇");
     document.getElementById('reg-phone').value = phone;
     showStep('step-register');
     return;
   }
-  renderResult(m);
+  renderResult(member);
 }
 
 function renderResult(m) {
   currentMemberId = m.id;
-  const s = getSettings();
+  const s = cache.getSettings();
   const gUrl = s.googleUrl || DEFAULT_GURL;
+
   document.getElementById('member-avatar').textContent = m.name.charAt(0).toUpperCase();
   document.getElementById('member-name-display').textContent = m.name;
   document.getElementById('member-meta').textContent = `Member since ${fmtDate(m.joinDate)} · ${m.stamps} stamps total`;
@@ -271,75 +301,89 @@ function renderResult(m) {
   document.getElementById('bday-name').textContent = m.name.split(' ')[0];
   document.getElementById('reward-alert').style.display =
     (m.stamps>0 && m.stamps%STAMPS===0 && m.pendingReward) ? 'block' : 'none';
+
   showStep('step-result');
 }
 
-function registerMember() {
+async function registerMember() {
   const name     = document.getElementById('reg-name').value.trim();
   const phone    = document.getElementById('reg-phone').value.trim();
   const birthday = document.getElementById('reg-birthday').value;
   if (!name||!phone) { toast('Please fill in your name and phone 😊'); return; }
-  if (byPhone(phone)) { toast('Phone already registered! Try checking in.'); return; }
 
-  const list = getMembers();
-  const nm = {
+  setLoading('reg-btn', true);
+  setSyncStatus('syncing', 'Registering…');
+
+  const newMember = {
     id: Date.now().toString(), name, phone, birthday,
-    stamps:0, joinDate:new Date().toISOString().split('T')[0],
-    pendingReward:false, history:[]
+    stamps:0, joinDate: new Date().toISOString().split('T')[0],
+    pendingReward:false, lastVisit: new Date().toISOString()
   };
-  list.push(nm);
-  saveMembers(list);
 
-  // ── NOTIFY ADMIN: new signup ──
+  let saved = false;
+  if (await checkOnline()) {
+    try {
+      const r = await api('addMember', { member: newMember });
+      if (r.ok) { saved = true; }
+      else if (r.error === 'Phone already registered') {
+        toast('Phone already registered! Try checking in.'); setLoading('reg-btn',false); return;
+      }
+    } catch(e) {}
+  }
+
+  // Always save locally too
+  const list = cache.get();
+  if (byPhone(list, phone)) { toast('Already registered! Try checking in.'); setLoading('reg-btn',false); return; }
+  list.push(newMember);
+  cache.save(list);
+
   notifyAdmin('signup', { name, phone });
-
+  setSyncStatus(saved ? 'online' : 'offline', saved ? 'Synced ✓' : 'Saved locally');
+  setLoading('reg-btn', false);
   toast(`Welcome to Topepop Tea, ${name}! 🎉`);
-  renderResult(nm);
+  renderResult(newMember);
 }
 
-// ── Called when customer taps Google Review button ──
 function onReviewTap() {
-  const members = getMembers();
+  const members = cache.get();
   const m = members.find(x => x.id === currentMemberId);
   const name = m ? m.name : 'A customer';
-
-  // Visual feedback for customer
   setTimeout(() => {
     document.getElementById('google-btn').classList.add('tapped');
     document.getElementById('review-thanks').style.display = 'block';
   }, 300);
-
-  // ── NOTIFY ADMIN: review tapped ──
   notifyAdmin('review', { name });
 }
 
-// ── Write an event to localStorage so admin page picks it up ──
 function notifyAdmin(type, data) {
-  const event = {
-    type,           // 'signup' | 'review'
-    data,
-    time: new Date().toISOString(),
-    id: Date.now().toString()
-  };
-  // Push to notifications queue
+  const event = { type, data, time: new Date().toISOString(), id: Date.now().toString() };
   const queue = JSON.parse(localStorage.getItem('topepopNotifications') || '[]');
   queue.push(event);
-  // Keep last 50 only
-  if (queue.length > 50) queue.splice(0, queue.length - 50);
+  if (queue.length > 50) queue.splice(0, queue.length-50);
   localStorage.setItem('topepopNotifications', JSON.stringify(queue));
-
-  // Also write a "latest" key — storage event fires on OTHER tabs/windows
   localStorage.setItem('topepopLatestNotif', JSON.stringify(event));
+}
+
+function setLoading(btnId, loading) {
+  const btn = document.getElementById(btnId);
+  if (!btn) return;
+  btn.disabled = loading;
+  if (loading) btn.textContent = '⏳ Please wait…';
+  else {
+    if (btnId==='lookup-btn') btn.textContent = 'Check My Rewards 🔍';
+    if (btnId==='reg-btn')    btn.textContent = 'Join & Start Earning! 🎉';
+  }
 }
 
 function toast(msg, ms=2800) {
   const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.classList.add('show');
+  el.textContent = msg; el.classList.add('show');
   setTimeout(()=>el.classList.remove('show'), ms);
 }
 
+// Init
 showStep('step-lookup');
+checkOnline();
 </script>
 </body>
 </html>
