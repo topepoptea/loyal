@@ -374,7 +374,7 @@ async function lookupMember() {
   setSyncStatus('syncing', 'Looking up…');
 
   let member = null;
-  if (SCRIPT_URL !== 'YOUR_APPS_SCRIPT_URL_HERE') {
+  if (SCRIPT_URL !== 'https://script.google.com/macros/s/AKfycbwtNKDQ4YoS58VAISiou_H_x4QWLR3ND3W2nm-1kz-lrU5yAZQ8KhHrSDFxlpT7yaX0uQ/exec') {
     try {
       const r = await Promise.race([
         api('getMember', { phone }),
@@ -407,7 +407,7 @@ async function lookupMember() {
 
 // Silently update stamp data from Sheets without blocking the UI
 async function syncMemberInBackground(phone) {
-  if (SCRIPT_URL === 'YOUR_APPS_SCRIPT_URL_HERE') return;
+  if (SCRIPT_URL === 'https://script.google.com/macros/s/AKfycbwtNKDQ4YoS58VAISiou_H_x4QWLR3ND3W2nm-1kz-lrU5yAZQ8KhHrSDFxlpT7yaX0uQ/exec') return;
   try {
     const r = await Promise.race([
       api('getMember', { phone }),
