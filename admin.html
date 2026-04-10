@@ -342,6 +342,28 @@ tr:hover td{background:rgba(255,255,255,.02);}
 // ══════════════════════════════════════════════════════
 // CONFIG & STATE
 // ══════════════════════════════════════════════════════
+async function api(payload) {
+  const s = getSettings(); // Correctly pulls from the settings you saved in doLogin
+  const url = s.scriptUrl; 
+  
+  if (!url) return { ok: false, error: 'No URL configured' };
+
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      // DO NOT use mode: 'no-cors'
+      // DO NOT add headers
+      body: JSON.stringify(payload)
+    });
+    
+    // This allows the app to actually read the member data
+    const result = await resp.json();
+    return result;
+  } catch (e) {
+    console.error("API Error:", e);
+    return { ok: false, error: 'Connection failed' };
+  }
+}
 const STAMPS = 10;
 let activeMember = null;
 let unreadNotifs = 0;
@@ -393,23 +415,31 @@ function initLoginScreen() {
 }
 
 async function doLogin() {
-  const pass    = document.getElementById('login-pass').value;
-  const urlInput= document.getElementById('login-url').value.trim();
-  const btn     = document.getElementById('login-btn');
+  const pass = document.getElementById('login-pass').value;
+  const urlInput = document.getElementById('login-url').value.trim();
+  const btn = document.getElementById('login-btn');
+  
+  // 1. Get current settings
+  let s = getSettings();
 
-  // Save script URL if entered on login screen
+  // 2. IMPORTANT: If user typed a new URL, save it NOW
   if (urlInput) {
-    const s = getSettings();
     s.scriptUrl = urlInput;
-    saveSettings_(s);
   }
 
-  if (pass !== getSettings().password) {
-    toast('Wrong password ❌'); return;
+  // 3. Check password
+  if (pass !== s.password) {
+    toast('Wrong password ❌');
+    return;
   }
 
-  btn.disabled    = true;
-  btn.textContent = '⏳ Connecting…';
+  // 4. SAVE the settings (this prevents the URL from disappearing)
+  s.isLoggedIn = true;
+  saveSettings_(s); 
+
+  // --- START OF THE PART YOU ASKED ABOUT (KEEP THIS) ---
+  btn.disabled = true;
+  btn.textContent = 'Syncing... ⏳';
 
   // Always pull fresh data from Sheets on login
   try {
@@ -422,16 +452,17 @@ async function doLogin() {
       setSyncStatus('online', 'Synced ✓');
     }
   } catch(e) {
-    setSyncStatus('offline', 'Offline — local data');
+    console.error("Sync failed:", e);
+    setSyncStatus('offline', 'Offline — using local data');
   }
 
   btn.disabled    = false;
   btn.textContent = 'Login →';
 
+  // Switch screens
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('main-app').style.display     = 'block';
   initApp();
-}
 
 function doLogout() {
   document.getElementById('login-screen').style.display = 'flex';
@@ -602,7 +633,7 @@ function openAdd() {
 }
 
 function openEdit(phone) {
-  const clean = p => p.replace(/\s/g,'');
+  const clean = p => String(p || '').replace(/\s/g, '');
   const m = getMembers().find(x => clean(x.phone) === clean(phone)); if (!m) return;
   document.getElementById('modal-title').textContent = 'Edit Member';
   document.getElementById('m-id').value       = m.id;
@@ -659,7 +690,7 @@ async function saveMember() {
 
 async function delMember(phone) {
   if (!confirm('Delete this member?')) return;
-  const clean = p => (p||'').replace(/\s/g,'');
+  const clean = p => String(p || '').replace(/\s/g, '');
   const m = getMembers().find(x => clean(x.phone) === clean(phone));
   saveMembers(getMembers().filter(x => clean(x.phone) !== clean(phone)));
   renderTable(); renderStats(); renderTodayPanel();
