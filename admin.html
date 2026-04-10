@@ -410,19 +410,13 @@ async function doLogin() {
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('main-app').style.display     = 'block';
   initApp();
-} 
-//
-
-function doLogout() {
-  document.getElementById('login-screen').style.display = 'flex';
-
+} //
 function doLogout() {
   const s = getSettings();
   s.isLoggedIn = false;
   saveSettings_(s);
   location.reload();
-}
-
+} 
 // ══════════════════════════════════════════════════════
 // INIT & CORE
 // ══════════════════════════════════════════════════════
