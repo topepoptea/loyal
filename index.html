@@ -17,253 +17,511 @@
   }
   * { box-sizing:border-box; margin:0; padding:0; }
   body {
-    font-family:'Nunito', sans-serif; background:var(--bg); color:var(--text);
-    display:flex; justify-content:center; align-items:flex-start; min-height:100vh;
-    padding:20px;
+    font-family:'Nunito',sans-serif; background:var(--bg);
+    background-image:
+      radial-gradient(circle at 15% 10%,rgba(125,160,58,0.09) 0%,transparent 40%),
+      radial-gradient(circle at 85% 85%,rgba(200,134,10,0.09) 0%,transparent 40%);
+    min-height:100vh; display:flex; flex-direction:column;
+    align-items:center; padding:28px 16px 80px;
   }
-  .app { width:100%; max-width:420px; }
+  .header { text-align:center; margin-bottom:24px; }
+  .logo-wrap { width:108px;height:108px;border-radius:50%;background:#fff;border:3px solid var(--border);box-shadow:0 4px 20px rgba(90,122,46,0.18);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;overflow:hidden; }
+  .logo-wrap img { width:96px;height:96px;object-fit:contain; }
+  .shop-name { font-family:'Baloo 2',cursive;font-size:1.85rem;font-weight:800;color:var(--primary);line-height:1; }
+  .shop-name span { color:var(--amber); }
+  .tagline { color:var(--muted);font-size:0.88rem;margin-top:4px; }
 
-  /* ── Card Styles ── */
-  .card {
-    background:var(--card); border:1px solid var(--border); border-radius:var(--radius);
-    padding:30px 24px; box-shadow:var(--shadow); margin-bottom:20px; text-align:center;
-  }
-  .logo-row { display:flex; align-items:center; justify-content:center; gap:12px; margin-bottom:12px; }
-  .logo-row img { width:54px; height:54px; border-radius:50%; background:#fff; padding:2px; }
-  .title { font-family:'Baloo 2', cursive; font-size:1.6rem; color:var(--primary); line-height:1.2; }
-  .sub { font-size:0.9rem; color:var(--muted); margin-bottom:12px; }
+  .card { background:var(--card);border:1.5px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:26px 22px;width:100%;max-width:420px;margin-bottom:18px; }
+  .card h2 { font-family:'Baloo 2',cursive;font-size:1.2rem;font-weight:700;color:var(--primary);margin-bottom:16px; }
 
-  /* ── Form Styles ── */
-  label { display:block; text-align:left; font-weight:800; font-size:0.8rem; color:var(--muted); margin:0 0 6px 4px; text-transform:uppercase; }
-  input {
-    width:100%; padding:14px 18px; border-radius:14px; border:2px solid var(--border);
-    background:var(--card); font-family:'Nunito', sans-serif; font-size:1rem; outline:none;
-    margin-bottom:16px; transition:border 0.2s;
-  }
+  label { display:block;font-weight:700;font-size:0.85rem;color:var(--muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:0.4px; }
+  input[type="text"],input[type="tel"],input[type="date"] { width:100%;padding:13px 15px;border-radius:12px;border:2px solid var(--border);background:var(--cream);font-family:'Nunito',sans-serif;font-size:1rem;color:var(--text);outline:none;transition:border 0.2s;margin-bottom:14px; }
   input:focus { border-color:var(--primary); }
-  .btn {
-    width:100%; padding:15px; border:none; border-radius:14px; font-family:'Nunito', sans-serif;
-    font-weight:800; font-size:1rem; cursor:pointer; transition:all 0.2s;
-    background:var(--primary); color:#fff; display:flex; align-items:center; justify-content:center; gap:8px;
+
+  .btn { display:block;width:100%;padding:14px;border:none;border-radius:14px;font-family:'Baloo 2',cursive;font-weight:700;font-size:1.1rem;cursor:pointer;transition:transform 0.12s,opacity 0.2s; }
+  .btn:hover  { opacity:0.88;transform:translateY(-1px); }
+  .btn:active { transform:scale(0.97); }
+  .btn:disabled { opacity:0.5;cursor:not-allowed;transform:none; }
+  .btn-green { background:var(--primary);color:#fff;box-shadow:0 4px 16px rgba(90,122,46,0.28); }
+  .btn-amber { background:var(--amber2);color:var(--brown);box-shadow:0 4px 14px rgba(200,134,10,0.22); }
+
+  .remember-row { display:flex;align-items:center;gap:9px;margin:-4px 0 14px; }
+  .remember-row input[type="checkbox"] { width:19px;height:19px;accent-color:var(--primary);cursor:pointer;flex-shrink:0;margin:0; }
+  .remember-row span { font-size:0.86rem;color:var(--muted);font-weight:600;cursor:pointer;user-select:none; }
+
+  .wb-card {
+    width:100%;max-width:420px;margin-bottom:18px;
+    background:linear-gradient(135deg,var(--primary),var(--primary2));
+    border-radius:var(--radius);padding:28px 22px;
+    text-align:center;box-shadow:var(--shadow);
+    animation:fadeUp 0.4s ease;
   }
-  .btn:hover { background:var(--primary2); transform:translateY(-1px); }
-  .btn:active { transform:translateY(0); }
-  .btn:disabled { background:var(--muted); cursor:not-allowed; transform:none; }
+  .wb-avatar { width:68px;height:68px;border-radius:50%;background:rgba(255,255,255,0.22);display:flex;align-items:center;justify-content:center;font-family:'Baloo 2',cursive;font-size:2rem;color:#fff;margin:0 auto 12px; }
+  .wb-name   { font-family:'Baloo 2',cursive;font-size:1.45rem;font-weight:800;color:#fff;margin-bottom:3px; }
+  .wb-phone  { font-size:0.85rem;color:rgba(255,255,255,0.72);margin-bottom:20px; }
+  .wb-btn    { display:block;width:100%;padding:14px;background:#fff;color:var(--primary);border:none;border-radius:13px;font-family:'Baloo 2',cursive;font-weight:800;font-size:1.1rem;cursor:pointer;transition:opacity 0.2s;margin-bottom:12px; }
+  .wb-btn:hover    { opacity:0.92; }
+  .wb-btn:disabled { opacity:0.55;cursor:not-allowed; }
+  .wb-switch { font-size:0.8rem;color:rgba(255,255,255,0.6);cursor:pointer;text-decoration:underline; }
+  .wb-switch:hover { color:#fff; }
 
-  /* ── Stamps Display ── */
-  .stamp-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:10px; margin:24px 0; }
-  .slot { aspect-ratio:1; background:var(--cream); border:2px dashed var(--border); border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:1.4rem; position:relative; }
-  .slot.filled { background:var(--card); border:2px solid var(--amber2); border-style:solid; animation:pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-  @keyframes pop { from {transform:scale(0.5); opacity:0;} to {transform:scale(1); opacity:1;} }
+  .stamps-grid { display:grid;grid-template-columns:repeat(5,1fr);gap:9px;margin:14px 0 8px; }
+  .stamp { aspect-ratio:1;border-radius:50%;background:var(--cream);border:2px dashed var(--border);display:flex;align-items:center;justify-content:center;font-size:1.3rem;transition:all 0.25s; }
+  .stamp.filled { background:linear-gradient(135deg,var(--amber2),var(--amber));border:2px solid var(--amber);box-shadow:0 2px 8px rgba(200,134,10,0.3); }
+  .stamp-count { text-align:center;color:var(--muted);font-size:0.87rem;margin-top:4px;font-weight:600; }
 
-  /* ── Progress Bar ── */
-  .progress-box { background:var(--cream); padding:12px; border-radius:12px; margin-top:20px; border:1px solid var(--border); }
-  .p-bar { height:10px; background:var(--border); border-radius:10px; overflow:hidden; margin-top:8px; }
-  .p-fill { height:100%; background:linear-gradient(90deg, var(--amber), var(--amber2)); width:0%; transition:width 1s ease-out; }
+  .member-info { display:flex;align-items:center;gap:14px;background:var(--cream);border-radius:14px;padding:14px 16px;margin-bottom:16px;border:1.5px solid var(--border); }
+  .avatar { width:48px;height:48px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;font-family:'Baloo 2',cursive;font-size:1.4rem;color:#fff;flex-shrink:0; }
+  .member-name { font-weight:800;color:var(--text);font-size:1.05rem; }
+  .member-meta { color:var(--muted);font-size:0.82rem;margin-top:2px; }
 
-  /* ── Review Section ── */
-  .review-box { background:linear-gradient(135deg, #4285f4, #34a853); padding:24px; border-radius:var(--radius); color:#fff; margin-top:20px; }
-  .review-btn { background:#fff; color:#4285f4; border-radius:10px; padding:12px; margin-top:14px; font-weight:800; text-decoration:none; display:inline-block; }
+  .birthday-banner { background:linear-gradient(135deg,#f9a825,#e65100);color:#fff;border-radius:14px;padding:14px 18px;font-weight:800;text-align:center;font-size:1rem;margin-bottom:16px;display:none;animation:softpulse 2s ease-in-out infinite;box-shadow:0 4px 18px rgba(230,81,0,0.3); }
+  .reward-alert    { background:linear-gradient(135deg,var(--primary2),var(--primary));color:#fff;border-radius:14px;padding:16px 18px;font-weight:800;text-align:center;font-size:1rem;margin-bottom:16px;display:none;box-shadow:0 4px 18px rgba(90,122,46,0.3); }
+  @keyframes softpulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.015)} }
 
-  .toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(80px); background:var(--brown); color:#fff; padding:12px 24px; border-radius:30px; font-weight:700; transition:transform 0.3s; z-index:999; }
+  .info-box { background:var(--cream);border:1.5px solid var(--border);border-radius:12px;padding:12px 14px;font-size:0.87rem;color:var(--muted);margin-bottom:16px;line-height:1.55; }
+
+  .google-btn { display:flex;align-items:center;justify-content:center;gap:10px;background:#fff;border:1.5px solid var(--border);color:var(--muted);padding:12px;border-radius:12px;cursor:pointer;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.93rem;text-decoration:none;transition:all 0.3s;margin-top:10px; }
+  .google-btn:hover  { border-color:#4285f4;color:#4285f4; }
+  .google-btn.tapped { border-color:#34a853;color:#34a853;background:#f0fff4; }
+  .review-thanks { display:none;margin-top:10px;background:linear-gradient(135deg,#e8f5e9,#f1f8e9);border:1.5px solid #a5d6a7;border-radius:12px;padding:14px 16px;text-align:center;font-weight:700;color:#2e7d32;font-size:0.92rem;animation:fadeUp 0.4s ease; }
+
+  .sync-pill { display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:0.75rem;font-weight:700;margin-bottom:14px; }
+  .sync-pill.online  { background:#e8f5e9;color:#2e7d32;border:1px solid #a5d6a7; }
+  .sync-pill.offline { background:#fff3e0;color:#e65100;border:1px solid #ffcc80; }
+  .sync-pill.syncing { background:#e3f2fd;color:#1565c0;border:1px solid #90caf9; }
+  .sync-dot { width:7px;height:7px;border-radius:50%; }
+  .online  .sync-dot { background:#34a853; }
+  .offline .sync-dot { background:#e65100; }
+  .syncing .sync-dot { background:#1565c0;animation:blink 0.8s infinite; }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  .offline-notice { background:#fff3e0;border:1.5px solid #ffcc80;border-radius:12px;padding:10px 14px;font-size:0.82rem;color:#e65100;margin-bottom:14px;display:none; }
+  .divider { border:none;border-top:2px dashed var(--border);margin:18px 0; }
+
+  #step-lookup   { width:100%;max-width:420px; }
+  #step-result   { display:none;width:100%;max-width:420px; }
+  #step-register { display:none;width:100%;max-width:420px; }
+
+  .back-link { color:var(--primary);font-weight:700;cursor:pointer;font-size:0.9rem;margin-bottom:12px;display:inline-block; }
+  .back-link:hover { text-decoration:underline; }
+
+  .toast { position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--brown);color:#fff;padding:11px 24px;border-radius:30px;font-size:0.92rem;font-weight:700;transition:transform 0.3s;z-index:999;white-space:nowrap; }
   .toast.show { transform:translateX(-50%) translateY(0); }
+
+  .leaf { position:fixed;opacity:0.05;pointer-events:none;font-size:8rem; }
+  .leaf.tl { top:-10px;left:-10px;transform:rotate(-30deg); }
+  .leaf.br { bottom:-10px;right:-10px;transform:rotate(150deg); }
+
+  @keyframes fadeUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
 </style>
 </head>
 <body>
+<div class="leaf tl">🌿</div>
+<div class="leaf br">🌿</div>
 
-<div class="app">
-  <div id="screen-login" class="card">
-    <div class="logo-row"><img src="logo.png" alt="logo"><div class="title">Topepop Tea</div></div>
-    <div class="sub">Loyalty Rewards • Topepop Tea Werribee</div>
-    
-    <div style="text-align:left; margin-top:20px;">
-      <label>Mobile Number</label>
-      <input type="tel" id="lookup-phone" placeholder="04xx xxx xxx" onkeydown="if(event.key==='Enter')doLookup()">
-      <button class="btn" id="lookup-btn" onclick="doLookup()">Check My Rewards 🔍</button>
-    </div>
+<div class="header">
+  <div class="logo-wrap"><img src="logo.png" alt="Topepop Tea"></div>
+  <div class="shop-name">Topepop <span>Tea</span></div>
+  <div class="tagline">Werribee · Sip, Stamp &amp; Earn Rewards 🧋</div>
+</div>
+
+<div id="step-lookup">
+  <div class="wb-card" id="wb-card" style="display:none">
+    <div class="wb-avatar" id="wb-avatar">?</div>
+    <div class="wb-name"   id="wb-name">Hi there!</div>
+    <div class="wb-phone"  id="wb-phone">—</div>
+    <button class="wb-btn" id="wb-btn" onclick="autoLogin()">See My Stamps 🧋</button>
+    <div class="wb-switch" onclick="forgetMe()">Not you? Switch account</div>
   </div>
 
-  <div id="screen-main" class="card" style="display:none;">
-    <div class="title" style="margin-bottom:4px;">Hello, <span id="user-name">!</span></div>
-    <div class="sub">You have <strong id="user-stamps">0</strong> stamps</div>
-
-    <div class="stamp-grid" id="stamp-grid"></div>
-
-    <div id="reward-banner" style="display:none; background:var(--primary); color:#fff; padding:14px; border-radius:12px; margin-bottom:18px; font-weight:800;">
-      🎁 YOU HAVE A FREE DRINK READY! 🎁
+  <div class="card" id="lookup-card">
+    <h2>👋 Welcome Back!</h2>
+    <div id="sync-status" class="sync-pill offline">
+      <div class="sync-dot"></div><span id="sync-label">Checking…</span>
     </div>
+    <div class="offline-notice" id="offline-notice">
+      ⚠️ No internet — using saved data. Syncs when back online.
+    </div>
+    <label for="phone-input">Your phone number</label>
+    <input type="tel" id="phone-input" placeholder="e.g. 0412 345 678" maxlength="15"
+           onkeydown="if(event.key==='Enter') lookupMember()">
+    <div class="remember-row">
+      <input type="checkbox" id="remember-me" onchange="onRememberChange()">
+      <span onclick="document.getElementById('remember-me').click()">Remember me on this phone</span>
+    </div>
+    <button class="btn btn-green" id="lookup-btn" onclick="lookupMember()">Check My Rewards 🔍</button>
+    <div class="divider"></div>
+    <button class="btn btn-amber" onclick="showRegister()">New here? Join free 📝</button>
+  </div>
+</div>
 
-    <div class="progress-box">
-      <div style="display:flex; justify-content:space-between; font-size:0.8rem; font-weight:800;">
-        <span>Progress to next reward</span>
-        <span id="p-text">0/10</span>
+<div id="step-result">
+  <span class="back-link" onclick="goBack()">← Back</span>
+  <div class="birthday-banner" id="birthday-banner">
+    🎂 Happy Birthday, <span id="bday-name"></span>!<br>
+    Tell our staff for your birthday surprise! 🎁
+  </div>
+  <div class="reward-alert" id="reward-alert">
+    🎉 You earned a FREE DRINK!<br>Show this to our staff to claim it! 🧋
+  </div>
+  <div class="card">
+    <div class="member-info">
+      <div class="avatar" id="member-avatar">?</div>
+      <div>
+        <div class="member-name" id="member-name-display">—</div>
+        <div class="member-meta" id="member-meta">—</div>
       </div>
-      <div class="p-bar"><div class="p-fill" id="p-fill"></div></div>
     </div>
-
-    <div class="review-box" id="review-box" style="display:none;">
-      <div style="font-weight:800; font-size:1.1rem;">Love our tea? 🧋</div>
-      <div style="font-size:0.85rem; opacity:0.9; margin-top:4px;">Leave us a quick Google review and let us know!</div>
-      <a href="#" id="google-link" target="_blank" class="review-btn" onclick="onReviewTap()">Leave a Review ⭐</a>
-      <div id="review-thanks" style="display:none; margin-top:12px; font-weight:800;">Thanks for your support! ❤️</div>
+    <h2>🧋 Your Stamp Card</h2>
+    <div class="stamps-grid" id="stamps-grid"></div>
+    <div class="stamp-count"  id="stamp-count-text"></div>
+    <div class="divider"></div>
+    <div class="info-box">
+      📱 <strong>Show this screen to our staff</strong> after each purchase.<br>
+      Collect <strong>10 stamps</strong> = <strong>1 free drink</strong>! 🎉
     </div>
-
-    <button class="btn" style="background:none; color:var(--muted); margin-top:24px; font-size:0.85rem;" onclick="location.reload()">← Back</button>
+    <a id="google-btn" href="#" target="_blank" class="google-btn" onclick="onReviewTap()">
+      <img width="20" height="20" src="https://www.google.com/favicon.ico" alt="G">
+      Leave us a Google Review ⭐
+    </a>
+    <div class="review-thanks" id="review-thanks">
+      🙏 Thank you! Your review means the world to us! 💚
+    </div>
   </div>
+</div>
 
-  <div id="screen-join" class="card" style="display:none;">
-    <div class="title">Join & Get a Stamp! 🎁</div>
-    <div class="sub">Sign up today and your first stamp is on us!</div>
-    <div style="text-align:left; margin-top:20px;">
-      <label>Full Name</label>
-      <input type="text" id="join-name" placeholder="Enter your name">
-      <button class="btn" id="join-btn" onclick="doJoin()">Join & Start Earning! 🎉</button>
+<div id="step-register">
+  <span class="back-link" onclick="goBack()">← Back</span>
+  <div class="card">
+    <h2>📝 Join the Rewards Club</h2>
+    <label>Full Name</label>
+    <input type="text" id="reg-name"     placeholder="Your name">
+    <label>Phone Number</label>
+    <input type="tel"  id="reg-phone"    placeholder="0412 345 678" maxlength="15">
+    <label>Birthday 🎂 — unlock a birthday surprise!</label>
+    <input type="date" id="reg-birthday">
+    <div class="remember-row">
+      <input type="checkbox" id="remember-reg" checked>
+      <span onclick="document.getElementById('remember-reg').click()">Remember me on this phone</span>
     </div>
+    <button class="btn btn-green" id="reg-btn" onclick="registerMember()">Join &amp; Start Earning! 🎉</button>
   </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
-/* ══ CONFIG ══ */
-// 
+/* ══ CONFIGURATION ══ */
 const parts = ["https://script.google.com", "/macros/s/","AKfycbwdYnv","YZn_XBExgZzsmwTy_AHaGAC","xWmM75mKFcC9B6vZ7KPXhrgN","icBujIiaWUKPReIg","/exec"; 
 const SCRIPT_URL = parts.join('');
-const STAMPS_FOR_REWARD = 10;
-let currentMemberId = null;
+const STAMPS       = 10;
+const DEFAULT_GURL = "https://g.page/r/CWIMn-xO_r7PEAE/review";
+const REMEMBER_KEY = 'topepopRememberMe';
 
-/* ══ STATE MANAGEMENT ══ */
 const cache = {
-  get: ()  => JSON.parse(localStorage.getItem('topepopMembers') || '[]'),
-  set: (d) => localStorage.setItem('topepopMembers', JSON.stringify(d))
+  get:         ()     => JSON.parse(localStorage.getItem('topepopMembers')  || '[]'),
+  save:        list   => localStorage.setItem('topepopMembers', JSON.stringify(list)),
+  getSettings: ()     => JSON.parse(localStorage.getItem('topepopSettings') || '{}'),
 };
+
+let currentMemberId = null;
+let isOnline        = false;
+let onlineChecked   = false;
+
+/* ══ REMEMBER ME ══ */
+function getSavedUser()          { try { return JSON.parse(localStorage.getItem(REMEMBER_KEY)); } catch(e) { return null; } }
+function saveUser(phone, name)   { localStorage.setItem(REMEMBER_KEY, JSON.stringify({ phone, name })); }
+function clearSavedUser()        { localStorage.removeItem(REMEMBER_KEY); }
+
+function initRememberMe() {
+  const saved = getSavedUser();
+  if (!saved) return;
+  document.getElementById('wb-card').style.display    = 'block';
+  document.getElementById('lookup-card').style.display = 'none';
+  document.getElementById('wb-avatar').textContent    = saved.name.charAt(0).toUpperCase();
+  document.getElementById('wb-name').textContent      = `Hi, ${saved.name.split(' ')[0]}! 👋`;
+  document.getElementById('wb-phone').textContent     = saved.phone;
+  document.getElementById('phone-input').value        = saved.phone;
+  document.getElementById('remember-me').checked      = true;
+}
+
+async function autoLogin() {
+  const saved = getSavedUser();
+  if (!saved) { forgetMe(); return; }
+  const btn = document.getElementById('wb-btn');
+  btn.disabled = true;
+  btn.textContent = '⏳ Loading…';
+  document.getElementById('phone-input').value = saved.phone;
+  await lookupMember();
+  btn.disabled = false;
+  btn.textContent = 'See My Stamps 🧋';
+}
+
+function forgetMe() {
+  clearSavedUser();
+  document.getElementById('wb-card').style.display    = 'none';
+  document.getElementById('lookup-card').style.display = 'block';
+  document.getElementById('phone-input').value         = '';
+  document.getElementById('remember-me').checked       = false;
+  toast('Removed from this phone');
+}
+
+function onRememberChange() {
+  if (!document.getElementById('remember-me').checked) {
+    clearSavedUser();
+    toast('Removed from this phone');
+  }
+}
+
+function maybeRemember(phone, name) {
+  const cb1 = document.getElementById('remember-me').checked;
+  const cb2 = document.getElementById('remember-reg') && document.getElementById('remember-reg').checked;
+  if (cb1 || cb2) saveUser(phone, name);
+}
 
 /* ══ API ══ */
 async function api(action, data = {}) {
-  if (!SCRIPT_URL || SCRIPT_URL.includes("PASTE_YOUR")) {
-    toast("Error: Developer needs to set the SCRIPT_URL");
-    throw new Error('No URL');
-  }
-
+  if (SCRIPT_URL === 'YOUR_APPS_SCRIPT_URL_HERE') throw new Error('No URL');
   const res = await fetch(SCRIPT_URL, {
-    method: 'POST',
-    // NO HEADERS to prevent 405 CORS error
-    body: JSON.stringify({ action, ...data })
+    method:   'POST',
+    redirect: 'follow',
+    headers:  { 'Content-Type': 'text/plain' }, 
+    body:     JSON.stringify({ action, ...data })
   });
-  
   if (!res.ok) throw new Error('HTTP ' + res.status);
   return res.json();
 }
 
-/* ══ CORE ACTIONS ══ */
-async function doLookup() {
-  const phone = document.getElementById('lookup-phone').value.trim().replace(/\s/g,'');
-  if (!phone) return toast('Please enter your number');
-
-  setLoading('lookup-btn', true);
+async function checkOnline() {
+  if (SCRIPT_URL === 'YOUR_APPS_SCRIPT_URL_HERE') { setSyncStatus('offline','Local mode'); return false; }
+  if (onlineChecked) return isOnline;
   try {
-    const r = await api('getMember', { phone });
-    if (r.ok && r.member) {
-      showMain(r.member);
-    } else {
-      showJoin(phone);
-    }
-  } catch(e) {
-    // Try local search if offline
-    const local = byPhone(cache.get(), phone);
-    if (local) showMain(local);
-    else toast('Connection error. Try again.');
-  }
-  setLoading('lookup-btn', false);
+    const r = await Promise.race([
+      fetch(SCRIPT_URL, {
+        method:'POST', redirect:'follow',
+        headers:{'Content-Type':'text/plain'},
+        body: JSON.stringify({ action:'ping' })
+      }),
+      new Promise((_,rej) => setTimeout(() => rej(), 5000))
+    ]);
+    isOnline = r.ok;
+  } catch { isOnline = false; }
+  onlineChecked = true;
+  setSyncStatus(isOnline ? 'online' : 'offline', isOnline ? 'Connected ✓' : 'Offline');
+  document.getElementById('offline-notice').style.display = isOnline ? 'none' : 'block';
+  return isOnline;
 }
 
-async function doJoin() {
-  const name = document.getElementById('join-name').value.trim();
-  const phone = document.getElementById('lookup-phone').value.trim().replace(/\s/g,'');
-  if (!name) return toast('Please enter your name');
-
-  setLoading('join-btn', true);
-  try {
-    const member = { name, phone, stamps: 1, joined: new Date().toISOString() };
-    const r = await api('addMember', { member });
-    if (r.ok) {
-      toast('Welcome! 1st Stamp Added! 🧋');
-      showMain(r.member || member);
-    }
-  } catch(e) { toast('Signup failed. Try again.'); }
-  setLoading('join-btn', false);
-}
-
-/* ══ UI LOGIC ══ */
-function showMain(m) {
-  currentMemberId = m.id;
-  document.getElementById('screen-login').style.display = 'none';
-  document.getElementById('screen-join').style.display  = 'none';
-  document.getElementById('screen-main').style.display  = 'block';
-  
-  document.getElementById('user-name').textContent = m.name.split(' ')[0] + '!';
-  document.getElementById('user-stamps').textContent = m.stamps;
-  
-  renderStamps(m.stamps);
-  
-  // Reward status
-  document.getElementById('reward-banner').style.display = m.pendingReward ? 'block' : 'none';
-  
-  // Show review box after 3 stamps
-  if (m.stamps >= 3) {
-    document.getElementById('review-box').style.display = 'block';
-    // Update review link if possible
-    const s = JSON.parse(localStorage.getItem('topepopSettings') || '{}');
-    if (s.googleUrl) document.getElementById('google-link').href = s.googleUrl;
-  }
-}
-
-function showJoin() {
-  document.getElementById('screen-login').style.display = 'none';
-  document.getElementById('screen-join').style.display  = 'block';
-}
-
-function renderStamps(count) {
-  const grid = document.getElementById('stamp-grid');
-  grid.innerHTML = '';
-  const current = count % STAMPS_FOR_REWARD;
-  
-  for (let i = 1; i <= STAMPS_FOR_REWARD; i++) {
-    const slot = document.createElement('div');
-    slot.className = i <= current ? 'slot filled' : 'slot';
-    slot.textContent = i <= current ? '🧋' : i;
-    grid.appendChild(slot);
-  }
-
-  const percent = (current / STAMPS_FOR_REWARD) * 100;
-  document.getElementById('p-fill').style.width = percent + '%';
-  document.getElementById('p-text').textContent = `${current}/${STAMPS_FOR_REWARD}`;
+function setSyncStatus(type, label) {
+  const el = document.getElementById('sync-status');
+  if (!el) return;
+  el.className = `sync-pill ${type}`;
+  document.getElementById('sync-label').textContent = label;
 }
 
 /* ══ HELPERS ══ */
 function byPhone(list, p) { 
-  const c = s => String(s || '').replace(/\s/g,''); 
+  const c = s => String(s || "").replace(/\s/g,''); 
   return list.find(m => c(m.phone) === c(p)); 
 }
+function isBday(s) { if(!s) return false; const t=new Date(),b=new Date(s); return b.getMonth()===t.getMonth()&&b.getDate()===t.getDate(); }
+function fmtDate(s) { if(!s) return '—'; return new Date(s).toLocaleDateString('en-AU',{year:'numeric',month:'short',day:'numeric'}); }
 
-function setLoading(id, isLoading) {
-  const btn = document.getElementById(id);
-  btn.disabled = isLoading;
-  if (id === 'lookup-btn') btn.textContent = isLoading ? 'Checking...' : 'Check My Rewards 🔍';
-  if (id === 'join-btn') btn.textContent = isLoading ? 'Joining...' : 'Join & Start Earning! 🎉';
+function showStep(id) {
+  ['step-lookup','step-result','step-register'].forEach(x =>
+    document.getElementById(x).style.display = x === id ? 'block' : 'none');
 }
 
-function toast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 3000);
+function goBack() {
+  showStep('step-lookup');
+  currentMemberId = null;
+  const saved = getSavedUser();
+  document.getElementById('wb-card').style.display    = saved ? 'block' : 'none';
+  document.getElementById('lookup-card').style.display = saved ? 'none' : 'block';
+}
+
+function showRegister() {
+  document.getElementById('reg-phone').value = document.getElementById('phone-input').value.trim();
+  showStep('step-register');
+}
+
+/* ══ LOOKUP ══ */
+async function lookupMember() {
+  const phone = document.getElementById('phone-input').value.trim();
+  if (!phone) { toast('Please enter your phone number 📱'); return; }
+
+  const localMember = byPhone(cache.get(), phone);
+  if (localMember) {
+    maybeRemember(localMember.phone, localMember.name);
+    renderResult(localMember);
+    syncMemberInBackground(phone);
+    return;
+  }
+
+  setLoading('lookup-btn', true);
+  setSyncStatus('syncing', 'Looking up…');
+
+  let member = null;
+  if (SCRIPT_URL !== 'YOUR_APPS_SCRIPT_URL_HERE') {
+    try {
+      const r = await Promise.race([
+        api('getMember', { phone }),
+        new Promise((_,rej) => setTimeout(() => rej(), 6000))
+      ]);
+      if (r.ok) {
+        member = r.member;
+        const list = cache.get();
+        const cleanPhone = p => p.replace(/\s/g,'');
+        const idx  = list.findIndex(m => cleanPhone(m.phone) === cleanPhone(phone));
+        if (idx >= 0) list[idx] = member; else list.push(member);
+        cache.save(list);
+        isOnline = true; onlineChecked = true;
+        setSyncStatus('online', 'Connected ✓');
+      }
+    } catch(e) { setSyncStatus('offline','Offline'); }
+  }
+
+  setLoading('lookup-btn', false);
+
+  if (!member) {
+    toast("No account found — let's register you! 👇");
+    document.getElementById('reg-phone').value = phone;
+    showStep('step-register');
+    return;
+  }
+
+  maybeRemember(member.phone, member.name);
+  renderResult(member);
+}
+
+async function syncMemberInBackground(phone) {
+  if (SCRIPT_URL === 'YOUR_APPS_SCRIPT_URL_HERE') return;
+  try {
+    const r = await Promise.race([
+      api('getMember', { phone }),
+      new Promise((_,rej) => setTimeout(() => rej(), 8000))
+    ]);
+    if (r.ok && r.member) {
+      const list = cache.get();
+      const cleanPhone = p => p.replace(/\s/g,'');
+      const idx  = list.findIndex(m => cleanPhone(m.phone) === cleanPhone(phone));
+      if (idx >= 0) list[idx] = r.member; else list.push(r.member);
+      cache.save(list);
+      isOnline = true; onlineChecked = true;
+      setSyncStatus('online', 'Synced ✓');
+      if (document.getElementById('step-result').style.display !== 'none') {
+        renderResult(r.member);
+      }
+    }
+  } catch(e) {}
+}
+
+/* ══ RENDER STAMP CARD ══ */
+function renderResult(m) {
+  currentMemberId = m.id;
+  const gUrl = cache.getSettings().googleUrl || DEFAULT_GURL;
+
+  document.getElementById('member-avatar').textContent       = m.name.charAt(0).toUpperCase();
+  document.getElementById('member-name-display').textContent = m.name;
+  document.getElementById('member-meta').textContent         = `Member since ${fmtDate(m.joinDate)} · ${m.stamps} stamps total`;
+  document.getElementById('google-btn').href                 = gUrl;
+  document.getElementById('google-btn').classList.remove('tapped');
+  document.getElementById('review-thanks').style.display     = 'none';
+
+  const cur  = m.stamps % STAMPS;
+  const grid = document.getElementById('stamps-grid');
+  grid.innerHTML = '';
+  for (let i = 0; i < STAMPS; i++) {
+    const d = document.createElement('div');
+    d.className   = 'stamp' + (i < cur ? ' filled' : '');
+    d.textContent = i < cur ? '🧋' : '';
+    grid.appendChild(d);
+  }
+
+  document.getElementById('stamp-count-text').textContent =
+    cur === 0            ? 'Get your first stamp next visit! 🧋' :
+    cur === STAMPS - 1   ? `${cur} / ${STAMPS} — ONE MORE for a free drink! 🎉` :
+                           `${cur} / ${STAMPS} stamps this round`;
+
+  document.getElementById('birthday-banner').style.display = isBday(m.birthday) ? 'block' : 'none';
+  document.getElementById('bday-name').textContent         = m.name.split(' ')[0];
+  document.getElementById('reward-alert').style.display    = m.pendingReward ? 'block' : 'none';
+
+  showStep('step-result');
+}
+
+/* ══ REGISTER ══ */
+async function registerMember() {
+  const name     = document.getElementById('reg-name').value.trim();
+  const phone    = document.getElementById('reg-phone').value.trim();
+  const birthday = document.getElementById('reg-birthday').value;
+  if (!name || !phone) { toast('Please fill in your name and phone 😊'); return; }
+
+  if (byPhone(cache.get(), phone)) {
+    toast('Already registered! Try checking in.'); return;
+  }
+
+  const newMember = {
+    id: Date.now().toString(), name, phone, birthday,
+    stamps: 0, joinDate: new Date().toISOString().split('T')[0],
+    pendingReward: false, lastVisit: new Date().toISOString(), history: []
+  };
+
+  const list = cache.get();
+  list.push(newMember);
+  cache.save(list);
+
+  maybeRemember(phone, name);
+  notifyAdmin('signup', { name, phone });
+  toast(`Welcome to Topepop Tea, ${name}! 🎉`);
+  renderResult(newMember);
+
+  if (SCRIPT_URL !== 'YOUR_APPS_SCRIPT_URL_HERE') {
+    try {
+      const r = await Promise.race([
+        api('addMember', { member: newMember }),
+        new Promise((_,rej) => setTimeout(() => rej(), 8000))
+      ]);
+      if (r.ok) { isOnline=true; onlineChecked=true; setSyncStatus('online','Synced ✓'); }
+    } catch(e) { setSyncStatus('offline','Saved locally — will sync later'); }
+  }
 }
 
 function onReviewTap() {
-  document.getElementById('review-thanks').style.display = 'block';
-  api('logReview', { phone: document.getElementById('lookup-phone').value });
+  const m = cache.get().find(x => x.id === currentMemberId);
+  setTimeout(() => {
+    document.getElementById('google-btn').classList.add('tapped');
+    document.getElementById('review-thanks').style.display = 'block';
+  }, 300);
+  notifyAdmin('review', { name: m ? m.name : 'A customer' });
 }
+
+function notifyAdmin(type, data) {
+  const event = { type, data, time: new Date().toISOString(), id: Date.now().toString() };
+  const queue = JSON.parse(localStorage.getItem('topepopNotifications') || '[]');
+  queue.push(event);
+  if (queue.length > 50) queue.splice(0, queue.length - 50);
+  localStorage.setItem('topepopNotifications', JSON.stringify(queue));
+  localStorage.setItem('topepopLatestNotif',   JSON.stringify(event));
+}
+
+function setLoading(btnId, loading) {
+  const btn = document.getElementById(btnId); if (!btn) return;
+  btn.disabled    = loading;
+  btn.textContent = loading ? '⏳ Please wait…' :
+    btnId === 'lookup-btn' ? 'Check My Rewards 🔍' : 'Join & Start Earning! 🎉';
+}
+
+function toast(msg, ms = 2800) {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), ms);
+}
+
+showStep('step-lookup');
+initRememberMe();
+checkOnline();
 </script>
 </body>
 </html>
