@@ -218,7 +218,7 @@ const SCRIPT_URL = parts.join('');
 const STAMPS       = 10;
 const DEFAULT_GURL = "https://g.page/r/CWIMn-xO_r7PEAE/review";
 const REMEMBER_KEY = 'topepopRememberMe';
-
+const doLookup = lookupMember;
 const cache = {
   get:         ()     => JSON.parse(localStorage.getItem('topepopMembers')  || '[]'),
   save:        list   => localStorage.setItem('topepopMembers', JSON.stringify(list)),
