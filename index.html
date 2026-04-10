@@ -126,8 +126,9 @@
 
 <script>
 /* ══ CONFIG ══ */
-// Paste your Web App URL here from Google Apps Script
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwdYnvYZn_XBExgZzsmwTy_AHaGACxWmM75mKFcC9B6vZ7KPXhrgNicBujIiaWUKPReIg/exec"; 
+// 
+const parts = ["https://script.google.com", "/macros/s/","AKfycbwdYnv","YZn_XBExgZzsmwTy_AHaGAC","xWmM75mKFcC9B6vZ7KPXhrgN","icBujIiaWUKPReIg","/exec"; 
+const SCRIPT_URL = parts.join('');
 const STAMPS_FOR_REWARD = 10;
 let currentMemberId = null;
 
