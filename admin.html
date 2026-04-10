@@ -188,7 +188,6 @@ tr:hover td{background:rgba(255,255,255,.02);}
     <label>Staff Password</label>
     <input type="password" id="login-pass" placeholder="Enter password" onkeydown="if(event.key==='Enter')doLogin()">
     <button class="btn primary block" id="login-btn" onclick="doLogin()">Login →</button>
-    <div style="margin-top:10px;font-size:.76rem;color:var(--muted)">Default password: <strong style="color:var(--amber)">boba1234</strong></div>
   </div>
 </div>
 
@@ -532,15 +531,15 @@ function renderTodayPanel() {
         <div class="quick-meta">${m.phone} · ${timeL}</div>
         <div class="quick-stamps">${dots}</div>
       </div>
-      <button class="big-stamp-btn" id="qsb-${m.id}" onclick="quickStamp('${m.id}')" title="Add stamp">🧋</button>
+      <button class="big-stamp-btn" id="qsb-${m.phone}" onclick="quickStamp('${m.phone}')" title="Add stamp">🧋</button>
     </div>`;
   }).join('');
 }
 
-async function quickStamp(id) {
-  const btn = document.getElementById('qsb-' + id);
+async function quickStamp(phone) {
+  const btn = document.getElementById('qsb-' + phone);
   if (btn) btn.disabled = true;
-  await doAddStamp(id);
+  await doAddStamp(phone);
   if (btn) {
     btn.disabled = false;
     btn.classList.remove('stamp-pop');
@@ -585,9 +584,9 @@ function renderTable() {
       <td><div class="s-bar">${dots}</div><small style="color:var(--muted)">${m.stamps} total</small></td>
       <td>${m.joinDate||'—'}</td>
       <td style="display:flex;gap:5px;flex-wrap:wrap;">
-        <button class="btn green sm" onclick="openStamp('${m.id}')">🧋 Stamp</button>
-        <button class="btn ghost sm" onclick="openEdit('${m.id}')">✏️</button>
-        <button class="btn red   sm" onclick="delMember('${m.id}')">🗑️</button>
+        <button class="btn green sm" onclick="openStamp('${m.phone}')">🧋 Stamp</button>
+        <button class="btn ghost sm" onclick="openEdit('${m.phone}')">✏️</button>
+        <button class="btn red   sm" onclick="delMember('${m.phone}')">🗑️</button>
       </td></tr>`;
   }).join('');
 }
@@ -602,8 +601,9 @@ function openAdd() {
   openModal('modal-member');
 }
 
-function openEdit(id) {
-  const m = getMembers().find(x => x.id === id); if (!m) return;
+function openEdit(phone) {
+  const clean = p => p.replace(/\s/g,'');
+  const m = getMembers().find(x => clean(x.phone) === clean(phone)); if (!m) return;
   document.getElementById('modal-title').textContent = 'Edit Member';
   document.getElementById('m-id').value       = m.id;
   document.getElementById('m-name').value     = m.name;
@@ -657,10 +657,11 @@ async function saveMember() {
   } catch(e) { setSyncStatus('offline','Saved locally'); }
 }
 
-async function delMember(id) {
+async function delMember(phone) {
   if (!confirm('Delete this member?')) return;
-  const m = getMembers().find(x => x.id === id);
-  saveMembers(getMembers().filter(x => x.id !== id));
+  const clean = p => (p||'').replace(/\s/g,'');
+  const m = getMembers().find(x => clean(x.phone) === clean(phone));
+  saveMembers(getMembers().filter(x => clean(x.phone) !== clean(phone)));
   renderTable(); renderStats(); renderTodayPanel();
   toast('Deleted');
   try { await api('deleteMember', { phone: m?.phone }); setSyncStatus('online','Synced ✓'); }
@@ -670,10 +671,11 @@ async function delMember(id) {
 // ══════════════════════════════════════════════════════
 // STAMP MODAL
 // ══════════════════════════════════════════════════════
-function openStamp(id) { activeMember = id; refreshStampModal(); openModal('modal-stamp'); }
+function openStamp(phone) { activeMember = phone; refreshStampModal(); openModal('modal-stamp'); }
 
 function refreshStampModal() {
-  const m = getMembers().find(x => x.id === activeMember); if (!m) return;
+  const clean = p => (p||'').replace(/\s/g,'');
+  const m = getMembers().find(x => clean(x.phone) === clean(activeMember)); if (!m) return;
   const cur = m.stamps % STAMPS;
   document.getElementById('sm-name').textContent  = m.name;
   document.getElementById('sm-bar').textContent   = Array.from({length:STAMPS},(_,i) => i < cur ? '🧋' : '⬜').join('');
@@ -705,10 +707,30 @@ async function modalRedeemReward() {
 // ══════════════════════════════════════════════════════
 // CORE STAMP — local first, Sheets in background
 // ══════════════════════════════════════════════════════
-async function doAddStamp(id) {
+async function doAddStamp(phone) {
   let list = getMembers();
-  const i  = list.findIndex(m => m.id === id);
-  if (i < 0) { toast('Member not found — try refreshing'); return; }
+  const clean = p => (p||'').replace(/\s/g,'');
+  const i  = list.findIndex(m => clean(m.phone) === clean(phone));
+  if (i < 0) {
+    // Not in local cache — try fetching from Sheets first
+    if (getScriptUrl()) {
+      try {
+        const r = await Promise.race([
+          api('getMember', { phone }),
+          new Promise((_,rej) => setTimeout(() => rej(), 6000))
+        ]);
+        if (r.ok && r.member) {
+          list.push(r.member);
+          saveMembers(list);
+          // Re-run with fresh data
+          await doAddStamp(phone);
+          return;
+        }
+      } catch(e) {}
+    }
+    toast('Member not found — tap 🔄 Refresh and try again');
+    return;
+  }
 
   // ── Update locally immediately ──
   list[i].stamps++;
@@ -729,7 +751,6 @@ async function doAddStamp(id) {
   renderTable(); renderStats();
 
   // ── Sync to Sheets in background ──
-  const phone = list[i].phone;
   if (getScriptUrl()) {
     try {
       const r = await Promise.race([
@@ -739,7 +760,8 @@ async function doAddStamp(id) {
       if (r.ok) {
         // Update local with server's authoritative stamp count
         const fresh = getMembers();
-        const j = fresh.findIndex(m => m.id === id);
+        const cleanP = p => (p||'').replace(/\s/g,'');
+        const j = fresh.findIndex(m => cleanP(m.phone) === cleanP(phone));
         if (j >= 0 && r.member) { fresh[j] = {...fresh[j], ...r.member}; saveMembers(fresh); }
         setSyncStatus('online','Synced ✓');
         renderTable(); renderStats();
@@ -755,10 +777,11 @@ async function doAddStamp(id) {
 // ══════════════════════════════════════════════════════
 // REDEEM REWARD
 // ══════════════════════════════════════════════════════
-async function doRedeemReward(id) {
+async function doRedeemReward(phone) {
   let list = getMembers();
-  const i  = list.findIndex(m => m.id === id);
-  if (i < 0) { toast('Member not found'); return; }
+  const clean = p => (p||'').replace(/\s/g,'');
+  const i  = list.findIndex(m => clean(m.phone) === clean(phone));
+  if (i < 0) { toast('Member not found — tap 🔄 Refresh'); return; }
   if (!list[i].pendingReward) { toast('No reward to redeem'); return; }
 
   // ── Update locally immediately ──
@@ -772,7 +795,6 @@ async function doRedeemReward(id) {
   renderTable(); renderStats(); renderTodayPanel();
 
   // ── Sync to Sheets in background ──
-  const phone = list[i].phone;
   if (getScriptUrl()) {
     try {
       const r = await Promise.race([
@@ -781,7 +803,8 @@ async function doRedeemReward(id) {
       ]);
       if (r.ok) {
         const fresh = getMembers();
-        const j = fresh.findIndex(m => m.id === id);
+        const cleanP = p => (p||'').replace(/\s/g,'');
+        const j = fresh.findIndex(m => cleanP(m.phone) === cleanP(phone));
         if (j >= 0 && r.member) { fresh[j] = {...fresh[j], ...r.member}; saveMembers(fresh); }
         setSyncStatus('online','Synced ✓');
       } else {
