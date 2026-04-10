@@ -290,7 +290,7 @@ function maybeRemember(phone, name) {
 
 /* ══ API ══ */
 async function api(action, data = {}) {
-  if (SCRIPT_URL === 'https://script.google.com/macros/s/AKfycbxRJ0-SNf44bPCSbDqRV3SDYe-eP-ienuk1RGZPkvGU1OCJmmRAelW_8vhiRozxQ_kSOA/exec') throw new Error('No URL');
+  if (SCRIPT_URL === 'YOUR_APPS_SCRIPT_URL_HERE') throw new Error('No URL');
   // Apps Script requires redirect following + specific content type
   const res = await fetch(SCRIPT_URL, {
     method:   'POST',
@@ -374,7 +374,7 @@ async function lookupMember() {
   setSyncStatus('syncing', 'Looking up…');
 
   let member = null;
-  if (SCRIPT_URL !== 'https://script.google.com/macros/s/AKfycbwtNKDQ4YoS58VAISiou_H_x4QWLR3ND3W2nm-1kz-lrU5yAZQ8KhHrSDFxlpT7yaX0uQ/exec') {
+  if (SCRIPT_URL !== 'YOUR_APPS_SCRIPT_URL_HERE') {
     try {
       const r = await Promise.race([
         api('getMember', { phone }),
@@ -407,7 +407,7 @@ async function lookupMember() {
 
 // Silently update stamp data from Sheets without blocking the UI
 async function syncMemberInBackground(phone) {
-  if (SCRIPT_URL === 'https://script.google.com/macros/s/AKfycbwtNKDQ4YoS58VAISiou_H_x4QWLR3ND3W2nm-1kz-lrU5yAZQ8KhHrSDFxlpT7yaX0uQ/exec') return;
+  if (SCRIPT_URL === 'YOUR_APPS_SCRIPT_URL_HERE') return;
   try {
     const r = await Promise.race([
       api('getMember', { phone }),
