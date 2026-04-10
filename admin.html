@@ -674,8 +674,9 @@ async function delMember(phone) {
 function openStamp(phone) { activeMember = phone; refreshStampModal(); openModal('modal-stamp'); }
 
 function refreshStampModal() {
-  const clean = p => (p||'').replace(/\s/g,'');
-  const m = getMembers().find(x => clean(x.phone) === clean(activeMember)); if (!m) return;
+  const clean = p => String(p || '').replace(/\s/g,''); 
+  const m = getMembers().find(x => clean(x.phone) === clean(activeMember)); 
+  if (!m) return;
   const cur = m.stamps % STAMPS;
   document.getElementById('sm-name').textContent  = m.name;
   document.getElementById('sm-bar').textContent   = Array.from({length:STAMPS},(_,i) => i < cur ? '🧋' : '⬜').join('');
