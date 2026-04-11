@@ -185,9 +185,11 @@ tr:hover td{background:rgba(255,255,255,.02);}
       <input type="text" id="login-url" placeholder="https://script.google.com/macros/s/.../exec">
     </div>
 
-    <label>Staff Password</label>
-    <input type="password" id="login-pass" placeholder="Enter password" onkeydown="if(event.key==='Enter')doLogin()">
-    <button class="btn primary block" id="login-btn" onclick="doLogin()">Login →</button>
+    <form onsubmit="doLogin(); return false;">
+      <label>Staff Password</label>
+      <input type="password" id="login-pass" placeholder="Enter password" autocomplete="current-password">
+      <button type="submit" class="btn primary block" id="login-btn">Login →</button>
+    </form>
   </div>
 </div>
 
