@@ -359,8 +359,6 @@ const getSettings  = ()    => JSON.parse(localStorage.getItem('topepopSettings')
   '{"password":"boba1234","shopName":"Topepop Tea","googleUrl":"","scriptUrl":""}');
 const saveSettings_= s     => localStorage.setItem('topepopSettings', JSON.stringify(s));
 const getScriptUrl = () => {
-  const s = getSettings();
-  if (s.scriptUrl) return s.scriptUrl;
   const unlock = (b,k) => atob(b).split('').map((c,i)=>String.fromCharCode(c.charCodeAt(0)^k.charCodeAt(i%k.length))).join('');
   return "https://script.google.com/macros/s/" + unlock("NSQWHBMNCXhcH09DQjkhNwglQEFebCYkQVc9X0QHSHcGRUIgHQQJAH1nf3wsMD8WNlo8S39EWRs6OjEiDQFTWmRaQiAJFhRY", "topepop2026") + "/exec";
 };
@@ -390,12 +388,9 @@ function setSyncStatus(type, label) {
 // AUTH
 // ══════════════════════════════════════════════════════
 function initLoginScreen() {
-  const url = getScriptUrl();
-  // Show URL field if not yet configured on this device
-  if (!url) {
-    document.getElementById('setup-needed').style.display = 'block';
-    document.getElementById('url-row').style.display      = 'block';
-  }
+  // URL is baked-in — no setup needed, hide those UI elements always
+  document.getElementById('setup-needed').style.display = 'none';
+  document.getElementById('url-row').style.display      = 'none';
 }
 
 async function doLogin() {
@@ -406,10 +401,8 @@ async function doLogin() {
   // 1. Get current settings
   let s = getSettings();
 
-  // 2. IMPORTANT: If user typed a new URL, save it NOW
-  if (urlInput) {
-    s.scriptUrl = urlInput;
-  }
+  // 2. URL is now baked in — clear any stale cached URL to avoid conflicts
+  s.scriptUrl = '';
 
   // 3. Check password
   if (pass !== s.password) {
@@ -417,9 +410,9 @@ async function doLogin() {
     return;
   }
 
-  // 4. SAVE the settings (this prevents the URL from disappearing)
+  // 4. Save settings
   s.isLoggedIn = true;
-  saveSettings_(s); 
+  saveSettings_(s);
 
   // --- START OF THE PART YOU ASKED ABOUT (KEEP THIS) ---
   btn.disabled = true;
@@ -429,7 +422,7 @@ async function doLogin() {
   try {
     const r = await Promise.race([
       api('getAll'),
-      new Promise((_,rej) => setTimeout(() => rej(new Error('timeout')), 8000))
+      new Promise((_,rej) => setTimeout(() => rej(new Error('timeout')), 25000))
     ]);
     if (r.ok && r.members) {
       saveMembers(r.members);
@@ -447,6 +440,7 @@ async function doLogin() {
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('main-app').style.display     = 'block';
   initApp();
+}
 
 function doLogout() {
   document.getElementById('login-screen').style.display = 'flex';
@@ -495,7 +489,7 @@ async function loadAllFromSheets(showToast = false) {
   try {
     const r = await Promise.race([
       api('getAll'),
-      new Promise((_,rej) => setTimeout(() => rej(new Error('timeout')), 8000))
+      new Promise((_,rej) => setTimeout(() => rej(new Error('timeout')), 25000))
     ]);
     if (r.ok && r.members) {
       saveMembers(r.members);
@@ -754,7 +748,7 @@ async function doAddStamp(phone, amount = 1) {
       try {
         const r = await Promise.race([
           api('getMember', { phone }),
-          new Promise((_,rej) => setTimeout(() => rej(), 6000))
+          new Promise((_,rej) => setTimeout(() => rej(), 25000))
         ]);
         if (r.ok && r.member) {
           list.push(r.member);
@@ -794,7 +788,7 @@ async function doAddStamp(phone, amount = 1) {
     try {
       const r = await Promise.race([
         api('addStamp', { phone, amount }),
-        new Promise((_,rej) => setTimeout(() => rej(new Error('timeout')), 8000))
+        new Promise((_,rej) => setTimeout(() => rej(new Error('timeout')), 25000))
       ]);
       if (r.ok) {
         // Update local with server's authoritative stamp count
@@ -838,7 +832,7 @@ async function doRedeemReward(phone) {
     try {
       const r = await Promise.race([
         api('redeemReward', { phone }),
-        new Promise((_,rej) => setTimeout(() => rej(new Error('timeout')), 8000))
+        new Promise((_,rej) => setTimeout(() => rej(new Error('timeout')), 25000))
       ]);
       if (r.ok) {
         const fresh = getMembers();
