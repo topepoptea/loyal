@@ -357,11 +357,14 @@ let lastPollId   = null;
 // ── Storage helpers ──
 const getMembers   = ()    => JSON.parse(localStorage.getItem('topepopMembers')  || '[]');
 const saveMembers  = list  => localStorage.setItem('topepopMembers', JSON.stringify(list));
-const getSettings  = ()    => JSON.parse(localStorage.getItem('topepopSettings') ||
-  '{"password":"boba1234","shopName":"Topepop Tea","googleUrl":"","scriptUrl":""}');
+const unlock       = (b,k) => atob(b).split('').map((c,i)=>String.fromCharCode(c.charCodeAt(0)^k.charCodeAt(i%k.length))).join('');
+const getSettings  = ()    => {
+  const stored = localStorage.getItem('topepopSettings');
+  if (stored) return JSON.parse(stored);
+  return { password: unlock("FgASBEFdQwY=","topepop2026"), shopName:"Topepop Tea", googleUrl:"", scriptUrl:"" };
+};
 const saveSettings_= s     => localStorage.setItem('topepopSettings', JSON.stringify(s));
 const getScriptUrl = () => {
-  const unlock = (b,k) => atob(b).split('').map((c,i)=>String.fromCharCode(c.charCodeAt(0)^k.charCodeAt(i%k.length))).join('');
   return "https://script.google.com/macros/s/" + unlock("NSQWHBMNCXhcH09DQjkhNwglQEFebCYkQVc9X0QHSHcGRUIgHQQJAH1nf3wsMD8WNlo8S39EWRs6OjEiDQFTWmRaQiAJFhRY", "topepop2026") + "/exec";
 };
 
