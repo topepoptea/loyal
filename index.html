@@ -422,14 +422,17 @@ function renderResult(m) {
   currentMemberId = m.id;
   const gUrl = cache.getSettings().googleUrl || DEFAULT_GURL;
 
+  // IMPORTANT FIX: Force the stamps to be a real math number, default to 0 if empty
+  const totalStamps = parseInt(m.stamps) || 0; 
+  const cur  = totalStamps % STAMPS;
+
   document.getElementById('member-avatar').textContent       = m.name.charAt(0).toUpperCase();
   document.getElementById('member-name-display').textContent = m.name;
-  document.getElementById('member-meta').textContent         = `Member since ${fmtDate(m.joinDate)} · ${m.stamps} stamps total`;
+  document.getElementById('member-meta').textContent         = `Member since ${fmtDate(m.joinDate)} · ${totalStamps} stamps total`;
   document.getElementById('google-btn').href                 = gUrl;
   document.getElementById('google-btn').classList.remove('tapped');
   document.getElementById('review-thanks').style.display     = 'none';
 
-  const cur  = m.stamps % STAMPS;
   const grid = document.getElementById('stamps-grid');
   grid.innerHTML = '';
   for (let i = 0; i < STAMPS; i++) {
@@ -450,7 +453,6 @@ function renderResult(m) {
 
   showStep('step-result');
 }
-
 /* ══ REGISTER ══ */
 async function registerMember() {
   const name     = document.getElementById('reg-name').value.trim();
