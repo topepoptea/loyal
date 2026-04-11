@@ -166,6 +166,7 @@ tr:hover td{background:rgba(255,255,255,.02);}
 </head>
 <body>
 
+<!-- ══ LOGIN ══ -->
 <div id="login-screen">
   <div class="login-card">
     <div class="login-logo-row">
@@ -173,6 +174,7 @@ tr:hover td{background:rgba(255,255,255,.02);}
       <div><div class="login-title">Admin Panel</div><div class="login-sub">Topepop Tea – Werribee</div></div>
     </div>
 
+    <!-- First time setup — no script URL saved -->
     <div class="setup-needed" id="setup-needed" style="display:none">
       <strong>⚙️ First time setup</strong>
       Enter your Apps Script URL below so this device can connect to Google Sheets.
@@ -189,6 +191,7 @@ tr:hover td{background:rgba(255,255,255,.02);}
   </div>
 </div>
 
+<!-- ══ MAIN APP ══ -->
 <div id="main-app">
   <div class="topbar">
     <div class="topbar-left">
@@ -212,6 +215,7 @@ tr:hover td{background:rgba(255,255,255,.02);}
 
     <div class="stats-grid" id="stats-grid"></div>
 
+    <!-- Today panel -->
     <div class="today-panel">
       <div class="today-header">
         <h2>⚡ Today's Customers</h2>
@@ -222,6 +226,7 @@ tr:hover td{background:rgba(255,255,255,.02);}
       </div>
     </div>
 
+    <!-- Notif history -->
     <div id="notif-history" style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:20px;overflow:hidden;display:none;">
       <div style="background:var(--card2);padding:11px 15px;display:flex;align-items:center;justify-content:space-between;">
         <span style="font-family:'Baloo 2',cursive;font-size:.98rem;">🔔 Recent Alerts</span>
@@ -230,12 +235,14 @@ tr:hover td{background:rgba(255,255,255,.02);}
       <div id="notif-history-list"></div>
     </div>
 
+    <!-- QR code -->
     <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;text-align:center;margin-bottom:18px;">
       <p style="color:var(--muted);font-size:.83rem;margin-bottom:11px;">📱 Print this QR code and place it at your counter</p>
       <div id="qr-gen" style="display:inline-block;background:#fff;padding:8px;border-radius:9px;"></div>
       <div style="margin-top:10px;"><button class="btn amber sm" onclick="window.print()">🖨️ Print QR</button></div>
     </div>
 
+    <!-- Members table -->
     <div class="section-title">👥 All Members</div>
     <div class="search-row">
       <input type="text" id="search" placeholder="Search name or phone…" oninput="renderTable()">
@@ -252,11 +259,12 @@ tr:hover td{background:rgba(255,255,255,.02);}
 
     <div class="divider"></div>
 
+    <!-- Settings -->
     <div class="section-title">⚙️ Settings</div>
     <div class="settings-box">
       <label>Google Apps Script URL</label>
       <input type="text" id="s-scripturl" placeholder="https://script.google.com/macros/s/YOUR_ID/exec">
-      <div class="hint">Paste the Web App URL from your Apps Script deployment</div>
+      <div class="hint">Paste the Web App URL from your Apps Script deployment (Step 4 in setup guide)</div>
       <label>Google Review Link</label>
       <input type="text" id="s-googleurl" placeholder="https://g.page/r/...">
       <label>Shop Name</label>
@@ -268,6 +276,7 @@ tr:hover td{background:rgba(255,255,255,.02);}
 
     <div class="divider"></div>
 
+    <!-- Backup -->
     <div class="section-title">💾 Backup & Restore</div>
     <div class="settings-box">
       <div id="backup-status" style="background:var(--card2);border:1px solid var(--border);border-radius:9px;padding:11px 14px;margin-bottom:14px;font-size:.84rem;display:flex;align-items:center;gap:9px;">
@@ -288,10 +297,14 @@ tr:hover td{background:rgba(255,255,255,.02);}
         <input type="file" id="csv-input" accept=".csv" style="display:none" onchange="importCSV(this)">
         <div id="import-result"></div>
       </div>
+      <div style="border-top:1px solid var(--border);padding-top:12px;margin-top:12px;">
+        <button class="btn red sm" onclick="clearLocalData()">🗑️ Clear Local Cache</button>
+      </div>
     </div>
   </div>
 </div>
 
+<!-- Modal: Add/Edit member -->
 <div class="overlay" id="modal-member">
   <div class="modal">
     <h3 id="modal-title">Add Member</h3>
@@ -307,6 +320,7 @@ tr:hover td{background:rgba(255,255,255,.02);}
   </div>
 </div>
 
+<!-- Modal: Stamp card -->
 <div class="overlay" id="modal-stamp">
   <div class="modal">
     <h3>🧋 <span id="sm-name">—</span></h3>
@@ -334,46 +348,44 @@ let unreadNotifs = 0;
 let lastNotifId  = null;
 let lastPollId   = null;
 
+// ── Storage helpers ──
 const getMembers   = ()    => JSON.parse(localStorage.getItem('topepopMembers')  || '[]');
 const saveMembers  = list  => localStorage.setItem('topepopMembers', JSON.stringify(list));
-const getSettings  = ()    => JSON.parse(localStorage.getItem('topepopSettings') || '{"password":"boba1234","shopName":"Topepop Tea","googleUrl":"","scriptUrl":""}');
+const getSettings  = ()    => JSON.parse(localStorage.getItem('topepopSettings') ||
+  '{"password":"boba1234","shopName":"Topepop Tea","googleUrl":"","scriptUrl":""}');
 const saveSettings_= s     => localStorage.setItem('topepopSettings', JSON.stringify(s));
+const getScriptUrl = ()    => getSettings().scriptUrl || '';
 
 // ══════════════════════════════════════════════════════
-// FIX 3: THE ROBUST API CALLER
+// API — single place for all Sheets calls
 // ══════════════════════════════════════════════════════
 async function api(action, data = {}) {
-  const s = getSettings();
-  if (!s.scriptUrl) return { ok: false, error: 'No URL configured' };
-
-  try {
-    const resp = await fetch(s.scriptUrl, {
-      method: 'POST',
-      body: JSON.stringify({ action, ...data })
-    });
-    return await resp.json();
-  } catch (e) {
-    console.error("API Error:", e);
-    return { ok: false, error: 'Connection failed' };
-  }
+  const url = getScriptUrl();
+  if (!url) throw new Error('No Apps Script URL configured');
+  const payload = encodeURIComponent(JSON.stringify({ action, ...data }));
+  const getUrl = url + "?payload=" + payload;
+  const res = await fetch(getUrl, { redirect: 'follow' });
+  if (!res.ok) throw new Error('HTTP ' + res.status);
+  return res.json();
 }
 
+// ── Sync status display ──
 function setSyncStatus(type, label) {
   const el = document.getElementById('sync-pill');
-  if (el) {
-    el.className = 'sync-pill ' + type;
-    document.getElementById('sync-label').textContent = label;
-  }
+  if (!el) return;
+  el.className = 'sync-pill ' + type;
+  document.getElementById('sync-label').textContent = label;
 }
 
 // ══════════════════════════════════════════════════════
 // AUTH
 // ══════════════════════════════════════════════════════
 function initLoginScreen() {
-  const s = getSettings();
-  if (!s.scriptUrl) {
+  const url = getScriptUrl();
+  // Show URL field if not yet configured on this device
+  if (!url) {
     document.getElementById('setup-needed').style.display = 'block';
-    document.getElementById('url-row').style.display = 'block';
+    document.getElementById('url-row').style.display      = 'block';
   }
 }
 
@@ -382,16 +394,29 @@ async function doLogin() {
   const urlInput = document.getElementById('login-url').value.trim();
   const btn = document.getElementById('login-btn');
   
+  // 1. Get current settings
   let s = getSettings();
-  if (urlInput) s.scriptUrl = urlInput;
-  if (pass !== s.password) { toast('Wrong password ❌'); return; }
 
+  // 2. IMPORTANT: If user typed a new URL, save it NOW
+  if (urlInput) {
+    s.scriptUrl = urlInput;
+  }
+
+  // 3. Check password
+  if (pass !== s.password) {
+    toast('Wrong password ❌');
+    return;
+  }
+
+  // 4. SAVE the settings (this prevents the URL from disappearing)
   s.isLoggedIn = true;
   saveSettings_(s); 
 
+  // --- START OF THE PART YOU ASKED ABOUT (KEEP THIS) ---
   btn.disabled = true;
   btn.textContent = 'Syncing... ⏳';
 
+  // Always pull fresh data from Sheets on login
   try {
     const r = await Promise.race([
       api('getAll'),
@@ -402,544 +427,596 @@ async function doLogin() {
       setSyncStatus('online', 'Synced ✓');
     }
   } catch(e) {
-    setSyncStatus('offline', 'Offline — local data');
+    console.error("Sync failed:", e);
+    setSyncStatus('offline', 'Offline — using local data');
   }
 
   btn.disabled    = false;
   btn.textContent = 'Login →';
+
+  // Switch screens
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('main-app').style.display     = 'block';
   initApp();
-} //
+
 function doLogout() {
-  const s = getSettings();
-  s.isLoggedIn = false;
-  saveSettings_(s);
-  location.reload();
-} 
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('main-app').style.display     = 'none';
+  document.getElementById('login-pass').value           = '';
+  window.removeEventListener('storage', onStorageEvent);
+}
+
 // ══════════════════════════════════════════════════════
-// INIT & CORE
+// INIT
 // ══════════════════════════════════════════════════════
 function initApp() {
-  document.getElementById('topbar-date').textContent = new Date().toLocaleDateString('en-AU',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
-  loadSettings();
-  renderStats();
-  renderQR();
-  renderTable();
-  renderTodayPanel();
-  updateBackupStatus();
-  updateAutoExportUI();
-  checkAutoExport();
+  document.getElementById('topbar-date').textContent =
+    new Date().toLocaleDateString('en-AU',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
+  renderStats(); renderQR(); renderTable(); renderTodayPanel();
+  loadSettings(); updateBackupStatus(); updateAutoExportUI(); checkAutoExport();
   renderNotifHistory();
-  
+  checkSetupBanner();
   window.addEventListener('storage', onStorageEvent);
-  setInterval(pollForNotifications, 15000); 
-  loadAllFromSheets();
+  setInterval(pollNotifications, 3000);
 }
 
-async function loadAllFromSheets(manual=false) {
-  if (manual) setSyncStatus('syncing', 'Syncing…');
+function checkSetupBanner() {
+  document.getElementById('setup-banner').style.display = getScriptUrl() ? 'none' : 'block';
+}
+
+// ══════════════════════════════════════════════════════
+// LOAD ALL FROM SHEETS
+// ══════════════════════════════════════════════════════
+async function loadAllFromSheets(showToast = false) {
+  if (!getScriptUrl()) { setSyncStatus('offline','No cloud setup'); return; }
+  setSyncStatus('syncing','Syncing…');
   try {
-    const r = await api('getAll');
+    const r = await Promise.race([
+      api('getAll'),
+      new Promise((_,rej) => setTimeout(() => rej(new Error('timeout')), 8000))
+    ]);
     if (r.ok && r.members) {
       saveMembers(r.members);
-      renderTable();
-      renderStats();
-      renderTodayPanel();
-      setSyncStatus('online', 'Synced ✓');
-      if (manual) toast('Data refreshed ✓');
+      setSyncStatus('online', 'Synced ✓ ' + fmtTime(new Date().toISOString()));
+      renderStats(); renderTable(); renderTodayPanel();
+      if (showToast) toast('Loaded ' + r.members.length + ' members ✓');
+    } else {
+      setSyncStatus('offline','Sheets error: ' + (r.error||'unknown'));
     }
   } catch(e) {
-    setSyncStatus('offline', 'Offline — local data');
+    setSyncStatus('offline','Offline — local data');
+    if (showToast) toast('Could not reach Sheets — showing local data');
   }
 }
 
 // ══════════════════════════════════════════════════════
-// TABLE & UI
+// HELPERS
+// ══════════════════════════════════════════════════════
+function isBday(s)  { if(!s)return false; const t=new Date(),b=new Date(s); return b.getMonth()===t.getMonth()&&b.getDate()===t.getDate(); }
+function fmtDate(s) { if(!s)return'—'; return new Date(s).toLocaleDateString('en-AU',{month:'short',day:'numeric'}); }
+function fmtTime(i) { if(!i)return''; return new Date(i).toLocaleTimeString('en-AU',{hour:'2-digit',minute:'2-digit'}); }
+function todayStr() { return new Date().toISOString().split('T')[0]; }
+
+// ══════════════════════════════════════════════════════
+// STATS
+// ══════════════════════════════════════════════════════
+function renderStats() {
+  const ms = getMembers();
+  const bdays   = ms.filter(m => isBday(m.birthday)).length;
+  const rewards  = ms.filter(m => m.pendingReward).length;
+  const todayV  = ms.filter(m => (m.history||[]).some(h=>h.date?.startsWith(todayStr())) || m.joinDate===todayStr()).length;
+  document.getElementById('stats-grid').innerHTML = `
+    <div class="stat-card"><div class="stat-val">${ms.length}</div><div class="stat-label">Members</div></div>
+    <div class="stat-card"><div class="stat-val">${todayV}</div><div class="stat-label">Today's Visits</div></div>
+    <div class="stat-card" style="border-color:#e65100"><div class="stat-val" style="color:#e65100">${bdays}</div><div class="stat-label">🎂 Birthdays</div></div>
+    <div class="stat-card" style="border-color:var(--green)"><div class="stat-val" style="color:var(--green)">${rewards}</div><div class="stat-label">🎁 Rewards</div></div>`;
+}
+
+// ══════════════════════════════════════════════════════
+// TODAY PANEL
+// ══════════════════════════════════════════════════════
+function renderTodayPanel() {
+  const today = todayStr();
+  const ms = getMembers().filter(m =>
+    (m.history||[]).some(h => h.date?.startsWith(today)) || m.joinDate === today);
+  document.getElementById('today-counter').textContent = ms.length + ' visit' + (ms.length!==1?'s':'');
+  const list = document.getElementById('today-list');
+  if (!ms.length) { list.innerHTML = '<div class="today-empty">No customers yet today 🧋</div>'; return; }
+  list.innerHTML = ms.map(m => {
+    const cur  = m.stamps % STAMPS;
+    const dots = Array.from({length:STAMPS},(_,i) => `<div class="qs-dot${i<cur?' on':''}"></div>`).join('');
+    const bdB  = isBday(m.birthday) ? '<span class="badge b-bday" style="font-size:.63rem">🎂</span> ' : '';
+    const rwB  = m.pendingReward    ? '<span class="badge b-reward" style="font-size:.63rem">🎁</span> ' : '';
+    const nwB  = m.joinDate===today ? '<span class="badge b-new" style="font-size:.63rem">New!</span> ' : '';
+    const lastH = [...(m.history||[])].reverse().find(h=>h.date?.startsWith(today));
+    const timeL = lastH ? fmtTime(lastH.date) : m.joinDate===today ? 'Registered today' : '';
+    return `<div class="quick-card" id="qc-${m.id}">
+      <div class="quick-avatar">${m.name.charAt(0).toUpperCase()}</div>
+      <div class="quick-info">
+        <div class="quick-name">${m.name} ${bdB}${rwB}${nwB}</div>
+        <div class="quick-meta">${m.phone} · ${timeL}</div>
+        <div class="quick-stamps">${dots}</div>
+      </div>
+      <button class="big-stamp-btn" id="qsb-${m.phone}" onclick="quickStamp('${m.phone}')" title="Add stamp">🧋</button>
+    </div>`;
+  }).join('');
+}
+
+async function quickStamp(phone) {
+  const btn = document.getElementById('qsb-' + phone);
+  if (btn) btn.disabled = true;
+  await doAddStamp(phone);
+  if (btn) {
+    btn.disabled = false;
+    btn.classList.remove('stamp-pop');
+    void btn.offsetWidth;
+    btn.classList.add('stamp-pop');
+    setTimeout(() => btn.classList.remove('stamp-pop'), 500);
+  }
+  renderTodayPanel(); renderStats();
+}
+
+// ══════════════════════════════════════════════════════
+// QR CODE
+// ══════════════════════════════════════════════════════
+function renderQR() {
+  const url = window.location.href.replace('admin.html','index.html');
+  document.getElementById('qr-gen').innerHTML = '';
+  new QRCode(document.getElementById('qr-gen'), {text:url,width:160,height:160,correctLevel:QRCode.CorrectLevel.H});
+}
+
+// ══════════════════════════════════════════════════════
+// MEMBERS TABLE
 // ══════════════════════════════════════════════════════
 function renderTable() {
-  const members = getMembers();
-  const query = document.getElementById('search').value.toLowerCase();
+  const q  = (document.getElementById('search')?.value || '').toLowerCase();
+  const ms = getMembers()
+    .filter(m => !q || m.name.toLowerCase().includes(q) || m.phone.includes(q))
+    .sort((a,b) => a.name.localeCompare(b.name));
   const tbody = document.getElementById('tbody');
-  tbody.innerHTML = '';
-
-  const filtered = members.filter(m => 
-    m.name.toLowerCase().includes(query) || m.phone.includes(query)
-  ).sort((a,b) => new Date(b.joined) - new Date(a.joined));
-
-  document.getElementById('empty-state').style.display = filtered.length ? 'none' : 'block';
-
-  filtered.forEach(m => {
-    const tr = document.createElement('tr');
-    tr.onclick = () => openStampModal(m.phone);
-    tr.style.cursor = 'pointer';
-
-    const isBday = checkIsBday(m.birthday);
-    const hasReward = m.pendingReward;
-
-    tr.innerHTML = `
-      <td>
-        <div style="font-weight:800;">${m.name}</div>
-        ${isBday ? '<span class="badge b-bday">🎂 Birthday</span>' : ''}
-        ${hasReward ? '<span class="badge b-reward">🎁 Reward!</span>' : ''}
-      </td>
+  const empty = document.getElementById('empty-state');
+  if (!ms.length) { tbody.innerHTML = ''; empty.style.display = 'block'; return; }
+  empty.style.display = 'none';
+  tbody.innerHTML = ms.map(m => {
+    const cur  = m.stamps % STAMPS;
+    const dots = Array.from({length:STAMPS},(_,i) => `<div class="s-dot${i<cur?' on':''}"></div>`).join('');
+    const bdB  = isBday(m.birthday) ? '<span class="badge b-bday">🎂</span> ' : '';
+    const rwB  = m.pendingReward    ? '<span class="badge b-reward">🎁 Reward</span> ' : '';
+    const nwB  = m.joinDate===todayStr() ? '<span class="badge b-new">New!</span> ' : '';
+    return `<tr>
+      <td><strong>${m.name}</strong> ${bdB}${rwB}${nwB}</td>
       <td>${m.phone}</td>
-      <td style="color:var(--muted);">${m.birthday || '—'}</td>
-      <td>
-        <div class="s-bar">${renderDots(m.stamps)}</div>
-        <div style="font-size:.7rem;color:var(--muted);margin-top:2px;">${m.stamps} stamps</div>
-      </td>
-      <td style="color:var(--muted);font-size:.75rem;">${m.joined ? m.joined.split('T')[0] : '—'}</td>
-      <td><button class="btn ghost sm" onclick="event.stopPropagation();openEdit('${m.phone}')">Edit</button></td>
-    `;
-    tbody.appendChild(tr);
-  });
-}
-
-function renderDots(count) {
-  let html = '';
-  const current = count % STAMPS;
-  for(let i=1; i<=STAMPS; i++) {
-    html += `<div class="s-dot ${i <= current ? 'on' : ''}"></div>`;
-  }
-  return html;
-}
-
-function renderStats() {
-  const members = getMembers();
-  const today = new Date().toISOString().split('T')[0];
-  const visitedToday = members.filter(m => m.lastVisit === today).length;
-  const rewards = members.filter(m => m.pendingReward).length;
-
-  document.getElementById('stats-grid').innerHTML = `
-    <div class="stat-card"><div class="stat-val">${members.length}</div><div class="stat-label">Total Members</div></div>
-    <div class="stat-card"><div class="stat-val" style="color:var(--amber);">${visitedToday}</div><div class="stat-label">Visited Today</div></div>
-    <div class="stat-card"><div class="stat-val" style="color:var(--green);">${rewards}</div><div class="stat-label">Rewards Ready</div></div>
-  `;
-}
-
-function renderTodayPanel() {
-  const members = getMembers();
-  const today = new Date().toISOString().split('T')[0];
-  const list = members.filter(m => m.lastVisit === today);
-  const container = document.getElementById('today-list');
-  
-  document.getElementById('today-counter').textContent = `${list.length} visit${list.length===1?'':'s'}`;
-
-  if (!list.length) {
-    container.innerHTML = '<div class="today-empty">No customers yet today 🧋</div>';
-    return;
-  }
-
-  container.innerHTML = '';
-  list.sort((a,b) => b.stamps - a.stamps).forEach(m => {
-    const div = document.createElement('div');
-    div.className = 'quick-card';
-    div.onclick = () => openStampModal(m.phone);
-    div.innerHTML = `
-      <div class="quick-avatar">${m.name[0]}</div>
-      <div class="quick-info">
-        <div class="quick-name">${m.name}</div>
-        <div class="quick-meta">${m.phone}</div>
-        <div class="quick-stamps">${renderDots(m.stamps)}</div>
-      </div>
-      <button class="big-stamp-btn" onclick="event.stopPropagation();doAddStamp('${m.phone}', this)">🧋</button>
-    `;
-    container.appendChild(div);
-  });
+      <td>${m.birthday ? fmtDate(m.birthday) : '—'}</td>
+      <td><div class="s-bar">${dots}</div><small style="color:var(--muted)">${m.stamps} total</small></td>
+      <td>${m.joinDate||'—'}</td>
+      <td style="display:flex;gap:5px;flex-wrap:wrap;">
+        <button class="btn green sm" onclick="openStamp('${m.phone}')">🧋 Stamp</button>
+        <button class="btn ghost sm" onclick="openEdit('${m.phone}')">✏️</button>
+        <button class="btn red   sm" onclick="delMember('${m.phone}')">🗑️</button>
+      </td></tr>`;
+  }).join('');
 }
 
 // ══════════════════════════════════════════════════════
-// ACTIONS
+// ADD / EDIT MEMBER
 // ══════════════════════════════════════════════════════
 function openAdd() {
-  document.getElementById('modal-title').textContent = 'Add New Member';
-  document.getElementById('m-id').value = '';
-  document.getElementById('m-name').value = '';
-  document.getElementById('m-phone').value = '';
-  document.getElementById('m-birthday').value = '';
+  document.getElementById('modal-title').textContent = 'Add Member';
+  ['m-id','m-name','m-phone','m-birthday'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('m-stamps').value = '0';
   openModal('modal-member');
 }
 
 function openEdit(phone) {
-  const clean = p => String(p || '').replace(/\s/g, ''); 
-  const m = getMembers().find(x => clean(x.phone) === clean(phone));
-  if (!m) return;
+  const clean = p => String(p || '').replace(/\s/g, '');
+  const m = getMembers().find(x => clean(x.phone) === clean(phone)); if (!m) return;
   document.getElementById('modal-title').textContent = 'Edit Member';
-  document.getElementById('m-id').value = m.phone;
-  document.getElementById('m-name').value = m.name;
-  document.getElementById('m-phone').value = m.phone;
+  document.getElementById('m-id').value       = m.id;
+  document.getElementById('m-name').value     = m.name;
+  document.getElementById('m-phone').value    = m.phone;
   document.getElementById('m-birthday').value = m.birthday || '';
-  document.getElementById('m-stamps').value = m.stamps;
+  document.getElementById('m-stamps').value   = m.stamps;
   openModal('modal-member');
 }
 
 async function saveMember() {
+  const id       = document.getElementById('m-id').value;
+  const name     = document.getElementById('m-name').value.trim();
+  const phone    = document.getElementById('m-phone').value.trim();
+  const birthday = document.getElementById('m-birthday').value;
+  const stamps   = parseInt(document.getElementById('m-stamps').value) || 0;
+  if (!name || !phone) { toast('Name and phone required!'); return; }
+
   const btn = document.getElementById('save-member-btn');
-  const m = {
-    name: document.getElementById('m-name').value.trim(),
-    phone: document.getElementById('m-phone').value.trim().replace(/\s/g,''),
-    birthday: document.getElementById('m-birthday').value,
-    stamps: parseInt(document.getElementById('m-stamps').value) || 0
+  btn.disabled = true; btn.textContent = 'Saving…';
+
+  const member = {
+    id:           id || Date.now().toString(),
+    name, phone, birthday, stamps,
+    joinDate:     id ? (getMembers().find(m=>m.id===id)?.joinDate || todayStr()) : todayStr(),
+    pendingReward: false,
+    lastVisit:    new Date().toISOString(),
+    history:      []
   };
 
-  if (!m.name || !m.phone) return toast('Name and Phone required!');
-
-  btn.disabled = true;
-  const isEdit = document.getElementById('m-id').value;
-  
-  try {
-    const r = await api(isEdit ? 'updateMember' : 'addMember', { member: m });
-    if (r.ok) {
-      toast(isEdit ? 'Updated ✓' : 'Added ✓');
-      closeModal('modal-member');
-      loadAllFromSheets();
-    } else {
-      toast('Error: ' + r.error);
+  // Save locally first
+  let list = getMembers();
+  if (id) {
+    list = list.map(m => m.id === id ? {...m, name, phone, birthday, stamps} : m);
+  } else {
+    if (list.find(m => m.phone.replace(/\s/g,'') === phone.replace(/\s/g,''))) {
+      toast('Phone already exists!'); btn.disabled=false; btn.textContent='Save ✓'; return;
     }
-  } catch(e) { toast('Save failed. Offline?'); }
-  btn.disabled = false;
+    list.push(member);
+  }
+  saveMembers(list);
+  closeModal('modal-member');
+  renderTable(); renderStats(); renderTodayPanel();
+  toast(id ? 'Updated ✓' : name + ' added! 🎉');
+  btn.disabled = false; btn.textContent = 'Save ✓';
+
+  // Sync to Sheets in background
+  try {
+    const r = await api(id ? 'updateMember' : 'addMember', { member });
+    if (r.ok) setSyncStatus('online','Synced ✓');
+    else if (r.error === 'Phone already registered') toast('Phone already in Sheets');
+  } catch(e) { setSyncStatus('offline','Saved locally'); }
 }
 
-async function doAddStamp(phone, btnEl) {
-  if (btnEl) {
-    btnEl.disabled = true;
-    btnEl.classList.add('stamp-pop');
-  }
-
-  const clean = p => String(p || '').replace(/\s/g, ''); 
-  const members = getMembers();
-  const m = members.find(x => clean(x.phone) === clean(phone));
-
-  if (m) {
-    m.stamps++;
-    m.lastVisit = new Date().toISOString().split('T')[0];
-    if (m.stamps % STAMPS === 0) m.pendingReward = true;
-    saveMembers(members);
-    renderTable();
-    renderTodayPanel();
-    if (activeMember) refreshStampModal(phone);
-  }
-
-  try {
-    const r = await api('addStamp', { phone });
-    if (r.ok) {
-      if (r.earnedReward) toast('Stamp added! REWARD EARNED! 🎁');
-      else toast('Stamp added! 🧋');
-      loadAllFromSheets();
-    }
-  } catch(e) { toast('Stamp saved locally ✓'); }
-
-  if (btnEl) {
-    setTimeout(() => {
-      btnEl.disabled = false;
-      btnEl.classList.remove('stamp-pop');
-    }, 400);
-  }
+async function delMember(phone) {
+  if (!confirm('Delete this member?')) return;
+  const clean = p => (p||'').replace(/\s/g,'');
+  const m = getMembers().find(x => clean(x.phone) === clean(phone));
+  saveMembers(getMembers().filter(x => clean(x.phone) !== clean(phone)));
+  renderTable(); renderStats(); renderTodayPanel();
+  toast('Deleted');
+  try { await api('deleteMember', { phone: m?.phone }); setSyncStatus('online','Synced ✓'); }
+  catch(e) { setSyncStatus('offline','Deleted locally'); }
 }
+
+// ══════════════════════════════════════════════════════
+// STAMP MODAL
+// ══════════════════════════════════════════════════════
+function openStamp(phone) { activeMember = phone; refreshStampModal(); openModal('modal-stamp'); }
+
+function refreshStampModal() {
+  const clean = p => String(p || '').replace(/\s/g,''); 
+  const m = getMembers().find(x => clean(x.phone) === clean(activeMember)); 
+  if (!m) return;
+  const cur = m.stamps % STAMPS;
+  document.getElementById('sm-name').textContent  = m.name;
+  document.getElementById('sm-bar').textContent   = Array.from({length:STAMPS},(_,i) => i < cur ? '🧋' : '⬜').join('');
+  let info = `${m.stamps} total stamps · ${cur}/${STAMPS} this round`;
+  if (isBday(m.birthday))  info += ' 🎂 BIRTHDAY!';
+  if (m.pendingReward)     info += ' 🎁 HAS REWARD!';
+  document.getElementById('sm-count').textContent = info;
+  document.getElementById('modal-redeem-btn').disabled = !m.pendingReward;
+}
+
+function editFromStamp() { closeModal('modal-stamp'); openEdit(activeMember); }
 
 async function modalAddStamp() {
-  if (!activeMember) return;
   const btn = document.getElementById('modal-stamp-btn');
-  await doAddStamp(activeMember.phone, btn);
+  btn.disabled = true; btn.textContent = 'Adding…';
+  await doAddStamp(activeMember);
+  refreshStampModal();
+  btn.disabled = false; btn.textContent = '+ Add Stamp 🧋';
 }
 
 async function modalRedeemReward() {
-  if (!activeMember || !activeMember.pendingReward) return;
   const btn = document.getElementById('modal-redeem-btn');
-  btn.disabled = true;
+  btn.disabled = true; btn.textContent = 'Redeeming…';
+  await doRedeemReward(activeMember);
+  refreshStampModal();
+  btn.disabled = false; btn.textContent = '🎁 Redeem Reward';
+}
 
-  try {
-    const r = await api('redeemReward', { phone: activeMember.phone });
-    if (r.ok) {
-      toast('Reward redeemed! 🎁');
-      closeModal('modal-stamp');
-      loadAllFromSheets();
-    } else {
-      toast(r.error);
+// ══════════════════════════════════════════════════════
+// CORE STAMP — local first, Sheets in background
+// ══════════════════════════════════════════════════════
+async function doAddStamp(phone) {
+  let list = getMembers();
+  const clean = p => (p||'').replace(/\s/g,'');
+  const i  = list.findIndex(m => clean(m.phone) === clean(phone));
+  if (i < 0) {
+    // Not in local cache — try fetching from Sheets first
+    if (getScriptUrl()) {
+      try {
+        const r = await Promise.race([
+          api('getMember', { phone }),
+          new Promise((_,rej) => setTimeout(() => rej(), 6000))
+        ]);
+        if (r.ok && r.member) {
+          list.push(r.member);
+          saveMembers(list);
+          // Re-run with fresh data
+          await doAddStamp(phone);
+          return;
+        }
+      } catch(e) {}
     }
-  } catch(e) { toast('Redeem failed. Check connection.'); }
-  btn.disabled = false;
+    toast('Member not found — tap 🔄 Refresh and try again');
+    return;
+  }
+
+  // ── Update locally immediately ──
+  list[i].stamps++;
+  list[i].history = list[i].history || [];
+  list[i].history.push({ date: new Date().toISOString(), action: 'stamp' });
+  const earned = list[i].stamps % STAMPS === 0;
+  if (earned) list[i].pendingReward = true;
+  saveMembers(list);
+
+  // ── Feedback immediately ──
+  if (earned) {
+    playSound('reward');
+    toast('🎉 ' + list[i].name + ' earned a FREE DRINK!', 3500);
+  } else {
+    playSound('stamp');
+    toast('Stamp ' + (list[i].stamps % STAMPS) + '/' + STAMPS + ' for ' + list[i].name.split(' ')[0] + ' ✓');
+  }
+  renderTable(); renderStats();
+
+  // ── Sync to Sheets in background ──
+  if (getScriptUrl()) {
+    try {
+      const r = await Promise.race([
+        api('addStamp', { phone }),
+        new Promise((_,rej) => setTimeout(() => rej(new Error('timeout')), 8000))
+      ]);
+      if (r.ok) {
+        // Update local with server's authoritative stamp count
+        const fresh = getMembers();
+        const cleanP = p => (p||'').replace(/\s/g,'');
+        const j = fresh.findIndex(m => cleanP(m.phone) === cleanP(phone));
+        if (j >= 0 && r.member) { fresh[j] = {...fresh[j], ...r.member}; saveMembers(fresh); }
+        setSyncStatus('online','Synced ✓');
+        renderTable(); renderStats();
+      } else {
+        setSyncStatus('offline','Stamp saved locally');
+      }
+    } catch(e) {
+      setSyncStatus('offline','Stamp saved locally — sync when online');
+    }
+  }
 }
 
 // ══════════════════════════════════════════════════════
-// MODALS & HELPERS
+// REDEEM REWARD
 // ══════════════════════════════════════════════════════
-function openStampModal(phone) {
-  const clean = p => String(p || '').replace(/\s/g, ''); 
-  activeMember = getMembers().find(x => clean(x.phone) === clean(phone));
-  if (!activeMember) return;
-  refreshStampModal(phone);
-  openModal('modal-stamp');
+async function doRedeemReward(phone) {
+  let list = getMembers();
+  const clean = p => (p||'').replace(/\s/g,'');
+  const i  = list.findIndex(m => clean(m.phone) === clean(phone));
+  if (i < 0) { toast('Member not found — tap 🔄 Refresh'); return; }
+  if (!list[i].pendingReward) { toast('No reward to redeem'); return; }
+
+  // ── Update locally immediately ──
+  list[i].pendingReward = false;
+  list[i].history = list[i].history || [];
+  list[i].history.push({ date: new Date().toISOString(), action: 'redeem' });
+  saveMembers(list);
+
+  playSound('reward');
+  toast('🎁 Reward redeemed for ' + list[i].name + '!');
+  renderTable(); renderStats(); renderTodayPanel();
+
+  // ── Sync to Sheets in background ──
+  if (getScriptUrl()) {
+    try {
+      const r = await Promise.race([
+        api('redeemReward', { phone }),
+        new Promise((_,rej) => setTimeout(() => rej(new Error('timeout')), 8000))
+      ]);
+      if (r.ok) {
+        const fresh = getMembers();
+        const cleanP = p => (p||'').replace(/\s/g,'');
+        const j = fresh.findIndex(m => cleanP(m.phone) === cleanP(phone));
+        if (j >= 0 && r.member) { fresh[j] = {...fresh[j], ...r.member}; saveMembers(fresh); }
+        setSyncStatus('online','Synced ✓');
+      } else {
+        setSyncStatus('offline','Redemption saved locally');
+      }
+    } catch(e) {
+      setSyncStatus('offline','Redemption saved locally — sync when online');
+    }
+  }
 }
 
-function refreshStampModal(phone) {
-  const clean = p => String(p || '').replace(/\s/g, ''); 
-  const m = getMembers().find(x => clean(x.phone) === clean(phone));
-  activeMember = m;
-  document.getElementById('sm-name').textContent = m.name;
-  document.getElementById('sm-bar').innerHTML = renderDots(m.stamps);
-  document.getElementById('sm-count').textContent = `${m.stamps} total stamps`;
-  document.getElementById('modal-redeem-btn').style.display = m.pendingReward ? 'block' : 'none';
+// ══════════════════════════════════════════════════════
+// SOUND
+// ══════════════════════════════════════════════════════
+function playSound(type) {
+  try {
+    const ctx = new (window.AudioContext||window.webkitAudioContext)();
+    if (type==='stamp') {
+      const o=ctx.createOscillator(),g=ctx.createGain();o.connect(g);g.connect(ctx.destination);
+      o.frequency.setValueAtTime(880,ctx.currentTime);o.frequency.exponentialRampToValueAtTime(440,ctx.currentTime+0.1);
+      g.gain.setValueAtTime(0.3,ctx.currentTime);g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.15);
+      o.start();o.stop(ctx.currentTime+0.15);
+    } else if (type==='reward') {
+      [523,659,784,1047].forEach((f,i)=>{
+        const o=ctx.createOscillator(),g=ctx.createGain();o.connect(g);g.connect(ctx.destination);
+        o.type='sine';o.frequency.value=f;
+        const t=ctx.currentTime+i*0.12;
+        g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(0.3,t+0.05);g.gain.exponentialRampToValueAtTime(0.001,t+0.3);
+        o.start(t);o.stop(t+0.3);
+      });
+    } else if (type==='signup') {
+      [660,880].forEach((f,i)=>{
+        const o=ctx.createOscillator(),g=ctx.createGain();o.connect(g);g.connect(ctx.destination);
+        o.type='sine';o.frequency.value=f;
+        const t=ctx.currentTime+i*0.18;
+        g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(0.25,t+0.04);g.gain.exponentialRampToValueAtTime(0.001,t+0.35);
+        o.start(t);o.stop(t+0.35);
+      });
+    } else if (type==='review') {
+      [1047,1319,1568].forEach((f,i)=>{
+        const o=ctx.createOscillator(),g=ctx.createGain();o.connect(g);g.connect(ctx.destination);
+        o.type='triangle';o.frequency.value=f;
+        const t=ctx.currentTime+i*0.1;
+        g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(0.2,t+0.04);g.gain.exponentialRampToValueAtTime(0.001,t+0.28);
+        o.start(t);o.stop(t+0.28);
+      });
+    }
+  } catch(e) {}
 }
 
-function editFromStamp() {
-  const p = activeMember.phone;
-  closeModal('modal-stamp');
-  openEdit(p);
+// ══════════════════════════════════════════════════════
+// NOTIFICATIONS
+// ══════════════════════════════════════════════════════
+function onStorageEvent(e) {
+  if (e.key==='topepopLatestNotif' && e.newValue) {
+    try { const n=JSON.parse(e.newValue); if(n.id!==lastNotifId){lastNotifId=n.id;handleNotif(n);} } catch(err){}
+  }
+}
+function pollNotifications() {
+  try {
+    const raw=localStorage.getItem('topepopLatestNotif'); if(!raw) return;
+    const n=JSON.parse(raw);
+    if (n.id!==lastPollId && n.id!==lastNotifId) { lastPollId=n.id; lastNotifId=n.id; handleNotif(n); }
+  } catch(e){}
+}
+function handleNotif(n) {
+  if (n.type==='signup') { playSound('signup'); showNotifPopup('signup','🎉 New Member!',n.data?.name+' just signed up'); renderStats(); renderTable(); renderTodayPanel(); }
+  else if (n.type==='review') { playSound('review'); showNotifPopup('review','⭐ Google Review!',n.data?.name+' tapped to leave a review'); }
+  const q=JSON.parse(localStorage.getItem('topepopNotifications')||'[]');
+  unreadNotifs=q.filter(x=>!x.read).length; updateNotifBadge(); renderNotifHistory();
+}
+function showNotifPopup(type,title,body) {
+  const popup=document.getElementById('notif-popup');
+  const el=document.createElement('div'); el.className='notif-item '+type;
+  el.innerHTML=`<div class="notif-title">${title}</div><div class="notif-body">${body}</div><div class="notif-close" onclick="dismissNotif(this)">✕</div>`;
+  popup.prepend(el); setTimeout(()=>dismissNotif(el.querySelector('.notif-close')),6000);
+  unreadNotifs++; updateNotifBadge();
+}
+function dismissNotif(closeBtn) {
+  const el=closeBtn.closest?closeBtn.closest('.notif-item'):closeBtn.parentElement;
+  if (!el||el.classList.contains('hiding')) return;
+  el.classList.add('hiding'); setTimeout(()=>el.remove(),300);
+}
+function updateNotifBadge() {
+  const b=document.getElementById('notif-badge');
+  if (unreadNotifs>0){b.textContent=unreadNotifs>9?'9+':unreadNotifs;b.classList.add('show');}
+  else b.classList.remove('show');
+}
+function toggleNotifHistory() {
+  const p=document.getElementById('notif-history');
+  const open=p.style.display!=='none'&&p.style.display!=='';
+  p.style.display=open?'none':'block';
+  if (!open) {
+    const q=JSON.parse(localStorage.getItem('topepopNotifications')||'[]');
+    q.forEach(n=>n.read=true); localStorage.setItem('topepopNotifications',JSON.stringify(q));
+    unreadNotifs=0; updateNotifBadge(); renderNotifHistory();
+  }
+}
+function renderNotifHistory() {
+  const q=JSON.parse(localStorage.getItem('topepopNotifications')||'[]');
+  const list=document.getElementById('notif-history-list');
+  if (!q.length){list.innerHTML='<div style="padding:14px;text-align:center;color:var(--muted);font-size:.85rem">No notifications yet</div>';return;}
+  list.innerHTML=[...q].reverse().slice(0,20).map(n=>`
+    <div style="padding:9px 15px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:11px;font-size:.83rem;">
+      <div>${n.type==='signup'?'🎉':'⭐'}</div>
+      <div>${n.type==='signup'?'New signup: <strong>'+n.data?.name+'</strong>':'Review tapped by <strong>'+n.data?.name+'</strong>'}</div>
+      <div style="color:var(--muted);font-size:.73rem;margin-left:auto;">${fmtTime(n.time)}</div>
+    </div>`).join('');
+}
+function clearNotifHistory() {
+  localStorage.removeItem('topepopNotifications'); localStorage.removeItem('topepopLatestNotif');
+  unreadNotifs=0; updateNotifBadge(); renderNotifHistory(); toast('Cleared');
 }
 
-function checkIsBday(dateStr) {
-  if (!dateStr) return false;
-  const today = new Date();
-  const bday = new Date(dateStr);
-  return today.getDate() === bday.getDate() && today.getMonth() === bday.getMonth();
+// ══════════════════════════════════════════════════════
+// SETTINGS
+// ══════════════════════════════════════════════════════
+function loadSettings() {
+  const s=getSettings();
+  document.getElementById('s-scripturl').value = s.scriptUrl  || '';
+  document.getElementById('s-shopname').value  = s.shopName   || '';
+  document.getElementById('s-googleurl').value = s.googleUrl  || '';
+}
+function saveSettings() {
+  const s   = getSettings();
+  const su  = document.getElementById('s-scripturl').value.trim();
+  const sn  = document.getElementById('s-shopname').value.trim();
+  const gu  = document.getElementById('s-googleurl').value.trim();
+  const pw  = document.getElementById('s-pass').value;
+  if (su) s.scriptUrl = su;
+  if (sn) s.shopName  = sn;
+  if (gu) s.googleUrl = gu;
+  if (pw) s.password  = pw;
+  saveSettings_(s);
+  document.getElementById('s-pass').value = '';
+  checkSetupBanner();
+  toast('Settings saved ✓');
+  if (su) loadAllFromSheets(true);
 }
 
+// ══════════════════════════════════════════════════════
+// BACKUP / RESTORE
+// ══════════════════════════════════════════════════════
+function buildCSV(ms) {
+  return ['Name,Phone,Birthday,Stamps,Joined,PendingReward,ID',
+    ...ms.map(m => [
+      `"${(m.name||'').replace(/"/g,'""')}"`,`"${(m.phone||'').replace(/"/g,'""')}"`,
+      `"${m.birthday||''}"`,`"${m.stamps||0}"`,`"${m.joinDate||''}"`,
+      `"${m.pendingReward?'Yes':'No'}"`,`"${m.id||''}"`].join(','))].join('\n');
+}
+function exportCSV(silent=false) {
+  const ms=getMembers(); if(!ms.length){if(!silent)toast('No data');return;}
+  const d=new Date().toISOString().slice(0,10);
+  const blob=new Blob([buildCSV(ms)],{type:'text/csv;charset=utf-8;'});
+  Object.assign(document.createElement('a'),{href:URL.createObjectURL(blob),download:`topepop-members-${d}.csv`}).click();
+  const s=getSettings(); s.lastBackup=new Date().toISOString(); saveSettings_(s);
+  updateBackupStatus(); if(!silent) toast('✅ CSV downloaded!');
+}
+function toggleAutoExport(){const s=getSettings();s.autoExport=!s.autoExport;saveSettings_(s);updateAutoExportUI();toast(s.autoExport?'⏰ Auto export ON!':'Auto export off');}
+function updateAutoExportUI(){const s=getSettings();const btn=document.getElementById('auto-toggle-btn');if(!btn)return;btn.textContent=s.autoExport?'⏰ Disable Auto Export':'⏰ Enable Auto Export';btn.className=s.autoExport?'btn green':'btn ghost';}
+function checkAutoExport(){const s=getSettings();if(!s.autoExport)return;const t=new Date();if(t.getDay()!==0)return;const ts=t.toISOString().slice(0,10);if(s.lastAutoExport===ts)return;exportCSV(true);s.lastAutoExport=ts;saveSettings_(s);toast('📅 Sunday auto-backup!',3500);}
+function updateBackupStatus(){const s=getSettings();const label=document.getElementById('last-backup-label');const dot=document.getElementById('backup-dot');if(!label)return;if(!s.lastBackup){label.textContent='Never';dot.style.background='var(--red)';return;}const d=new Date(s.lastBackup),now=new Date(),days=Math.floor((now-d)/86400000);label.textContent=days===0?'Today '+fmtTime(s.lastBackup):days===1?'Yesterday':`${days} days ago`;dot.style.background=days<=7?'var(--green)':days<=14?'var(--amber)':'var(--red)';}
+function parseCSVLine(line){const r=[];let cur='',inQ=false;for(let i=0;i<line.length;i++){const c=line[i];if(c==='"'){if(inQ&&line[i+1]==='"'){cur+='"';i++;}else inQ=!inQ;}else if(c===','&&!inQ){r.push(cur.trim());cur='';}else cur+=c;}r.push(cur.trim());return r;}
+function importFromText(text){
+  const lines=text.trim().split('\n').filter(l=>l.trim());
+  if(lines.length<2){showImportResult('error','File empty.');return;}
+  const header=parseCSVLine(lines[0]).map(h=>h.toLowerCase().replace(/\s/g,''));
+  const col=k=>header.indexOf(k);
+  const iN=col('name'),iP=col('phone'),iB=col('birthday'),iS=col('stamps'),iJ=col('joined'),iR=col('pendingreward'),iI=col('id');
+  if(iN<0||iP<0){showImportResult('error','Cannot find columns.');return;}
+  const existing=getMembers();let added=0,skipped=0,updated=0;const newList=[...existing];
+  for(let i=1;i<lines.length;i++){
+    const c=parseCSVLine(lines[i]);if(c.length<2)continue;
+    const phone=(c[iP]||'').replace(/\s/g,''),name=c[iN]||'';
+    if(!name||!phone){skipped++;continue;}
+    const stamps=iS>=0?parseInt(c[iS])||0:0;
+    const idx=newList.findIndex(m=>m.phone.replace(/\s/g,'')===phone);
+    if(idx>=0){if(stamps>newList[idx].stamps){newList[idx].stamps=stamps;updated++;}else skipped++;}
+    else{newList.push({id:iI>=0?c[iI]||Date.now().toString():Date.now().toString(),name,phone,birthday:iB>=0?c[iB]||'':'',stamps,joinDate:iJ>=0?c[iJ]||'':'',pendingReward:iR>=0&&c[iR]?.toLowerCase()==='yes',history:[]});added++;}
+  }
+  saveMembers(newList);renderTable();renderStats();renderTodayPanel();
+  showImportResult('success',`✅ Done: ${added} added, ${updated} updated, ${skipped} skipped`);
+  toast(`Imported! +${added} members`,3000);
+}
+function showImportResult(type,msg){const el=document.getElementById('import-result');el.style.cssText=`display:block;margin-top:11px;padding:11px 13px;border-radius:9px;font-size:.85rem;font-weight:700;background:${type==='success'?'rgba(90,158,74,.15)':'rgba(192,57,43,.15)'};border:1px solid ${type==='success'?'rgba(90,158,74,.4)':'rgba(192,57,43,.4)'};color:${type==='success'?'var(--primary)':'#e74c3c'}`;el.textContent=msg;}
+function importCSV(input){const file=input.files[0];if(!file)return;const r=new FileReader();r.onload=e=>importFromText(e.target.result);r.readAsText(file);input.value='';}
+function onDragOver(e){e.preventDefault();document.getElementById('drop-zone').style.borderColor='var(--primary)';}
+function onDragLeave(){document.getElementById('drop-zone').style.borderColor='var(--border)';}
+function onDrop(e){e.preventDefault();onDragLeave();const file=e.dataTransfer.files[0];if(!file||!file.name.endsWith('.csv')){showImportResult('error','Drop a .csv file.');return;}const r=new FileReader();r.onload=ev=>importFromText(ev.target.result);r.readAsText(file);}
+function clearLocalData(){if(!confirm('Clear local cache on this device?'))return;localStorage.removeItem('topepopMembers');renderTable();renderStats();renderTodayPanel();toast('Local cache cleared');}
+
+// ══════════════════════════════════════════════════════
+// MODAL HELPERS
+// ══════════════════════════════════════════════════════
 function openModal(id)  { document.getElementById(id).classList.add('open'); }
-function closeModal(id) { 
-  document.getElementById(id).classList.remove('open'); 
-  if (id === 'modal-stamp') activeMember = null;
-}
-
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 function toast(msg, ms=2600) {
   const el=document.getElementById('toast'); el.textContent=msg; el.classList.add('show');
   setTimeout(()=>el.classList.remove('show'),ms);
 }
 
 // ══════════════════════════════════════════════════════
-// NOTIFICATIONS
+// INIT
 // ══════════════════════════════════════════════════════
-async function pollForNotifications() {
-  const s = getSettings();
-  if (!s.isLoggedIn) return;
-  
-  const lastId = localStorage.getItem('topepopLastNotifId');
-  try {
-    const r = await api('getNotifications', { lastId });
-    if (r.ok && r.notifications.length) {
-      r.notifications.forEach(n => showNotif(n));
-      localStorage.setItem('topepopLastNotifId', r.notifications[0].id);
-    }
-  } catch(e) {}
-}
-
-function showNotif(n) {
-  const container = document.getElementById('notif-popup');
-  const el = document.createElement('div');
-  el.className = `notif-item ${n.type}`;
-  el.innerHTML = `
-    <div class="notif-close" onclick="this.parentElement.remove()">✕</div>
-    <div class="notif-title">${n.type === 'signup' ? '🎉 New Member' : '⭐ New Review'}</div>
-    <div class="notif-body">${n.message}</div>
-  `;
-  container.prepend(el);
-  
-  const history = JSON.parse(localStorage.getItem('notifHistory') || '[]');
-  history.unshift({...n, time: new Date().toLocaleTimeString()});
-  localStorage.setItem('notifHistory', JSON.stringify(history.slice(0, 20)));
-  
-  unreadNotifs++;
-  updateNotifBadge();
-  
-  setTimeout(() => {
-    el.classList.add('hiding');
-    setTimeout(() => el.remove(), 400);
-  }, 6000);
-}
-
-function updateNotifBadge() {
-  const b = document.getElementById('notif-badge');
-  b.textContent = unreadNotifs;
-  b.className = unreadNotifs > 0 ? 'notif-badge show' : 'notif-badge';
-}
-
-function toggleNotifHistory() {
-  unreadNotifs = 0;
-  updateNotifBadge();
-  const el = document.getElementById('notif-history');
-  el.style.display = el.style.display === 'none' ? 'block' : 'none';
-  renderNotifHistory();
-}
-
-function renderNotifHistory() {
-  const history = JSON.parse(localStorage.getItem('notifHistory') || '[]');
-  const list = document.getElementById('notif-history-list');
-  if (!history.length) {
-    list.innerHTML = '<div style="padding:20px;text-align:center;color:var(--muted);font-size:.85rem;">No recent alerts</div>';
-    return;
-  }
-  list.innerHTML = history.map(n => `
-    <div style="padding:10px 15px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
-      <div>
-        <div style="font-size:.85rem;font-weight:700;">${n.message}</div>
-        <div style="font-size:.7rem;color:var(--muted);">${n.time}</div>
-      </div>
-      <div class="badge ${n.type==='signup'?'b-new':'b-reward'}" style="font-size:.6rem;">${n.type.toUpperCase()}</div>
-    </div>
-  `).join('');
-}
-
-function clearNotifHistory() {
-  localStorage.setItem('notifHistory', '[]');
-  renderNotifHistory();
-}
-
-// ══════════════════════════════════════════════════════
-// SETTINGS & BACKUP
-// ══════════════════════════════════════════════════════
-function loadSettings() {
-  const s = getSettings();
-  document.getElementById('s-scripturl').value = s.scriptUrl || '';
-  document.getElementById('s-googleurl').value = s.googleUrl || '';
-  document.getElementById('s-shopname').value  = s.shopName || '';
-}
-
-function saveSettings() {
-  const s = getSettings();
-  const newPass = document.getElementById('s-pass').value;
-  
-  s.scriptUrl = document.getElementById('s-scripturl').value.trim();
-  s.googleUrl = document.getElementById('s-googleurl').value.trim();
-  s.shopName  = document.getElementById('s-shopname').value.trim();
-  if (newPass) s.password = newPass;
-
-  saveSettings_(s);
-  toast('Settings saved ✓');
-  loadAllFromSheets(true);
-  renderQR();
-}
-
-function exportCSV() {
-  const members = getMembers();
-  if (!members.length) return toast('No data to export');
-  
-  const headers = ['Name', 'Phone', 'Birthday', 'Stamps', 'PendingReward', 'Joined', 'LastVisit'];
-  const rows = members.map(m => [
-    m.name, m.phone, m.birthday, m.stamps, m.pendingReward, m.joined, m.lastVisit
-  ]);
-  
-  let csv = headers.join(',') + '\n' + rows.map(r => r.join(',')).join('\n');
-  const blob = new Blob([csv], { type: 'text/csv' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `topepop_backup_${new Date().toISOString().split('T')[0]}.csv`;
-  a.click();
-  
-  localStorage.setItem('lastBackup', new Date().toISOString());
-  updateBackupStatus();
-}
-
-function importCSV(input) {
-  const file = input.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = e => {
-    const text = e.target.result;
-    const lines = text.split('\n').filter(l => l.trim());
-    if (lines.length < 2) return toast('Invalid CSV');
-    
-    const members = lines.slice(1).map(line => {
-      const parts = line.split(',');
-      return {
-        name: parts[0], phone: parts[1], birthday: parts[2],
-        stamps: parseInt(parts[3]), pendingReward: parts[4] === 'true',
-        joined: parts[5], lastVisit: parts[6]
-      };
-    });
-    
-    if (confirm(`Import ${members.length} members? This will overwrite local data.`)) {
-      saveMembers(members);
-      renderTable();
-      toast('Imported successfully ✓');
-    }
-  };
-  reader.readAsText(file);
-}
-
-function updateBackupStatus() {
-  const last = localStorage.getItem('lastBackup');
-  const label = document.getElementById('last-backup-label');
-  const dot = document.getElementById('backup-dot');
-  if (!last) return;
-  
-  const diff = (new Date() - new Date(last)) / (1000 * 60 * 60 * 24);
-  label.textContent = new Date(last).toLocaleDateString();
-  dot.style.background = diff > 7 ? 'var(--red)' : 'var(--green)';
-}
-
-function toggleAutoExport() {
-  const enabled = localStorage.getItem('autoExport') === 'true';
-  localStorage.setItem('autoExport', !enabled);
-  updateAutoExportUI();
-}
-
-function updateAutoExportUI() {
-  const enabled = localStorage.getItem('autoExport') === 'true';
-  const btn = document.getElementById('auto-toggle-btn');
-  btn.textContent = enabled ? '⏰ Auto Export: ON' : '⏰ Enable Auto Export';
-  btn.className = enabled ? 'btn green' : 'btn ghost';
-}
-
-function checkAutoExport() {
-  if (localStorage.getItem('autoExport') !== 'true') return;
-  const last = localStorage.getItem('lastBackup');
-  if (!last || (new Date() - new Date(last)) > (1000 * 60 * 60 * 24)) {
-    exportCSV();
-  }
-}
-
-function renderQR() {
-  const qrg = document.getElementById('qr-gen');
-  qrg.innerHTML = '';
-  const url = window.location.href.replace('admin.html', 'index.html');
-  new QRCode(qrg, { text: url, width: 140, height: 140, colorDark: "#2e2008" });
-}
-
-function onStorageEvent() {
-  renderTable();
-  renderStats();
-  renderTodayPanel();
-}
-
-function clearLocalData() {
-  if (confirm('Permanently delete local cache? (This won\'t affect Google Sheets)')) {
-    localStorage.removeItem('topepopMembers');
-    location.reload();
-  }
-}
-
-// Drag & Drop helpers
-function onDragOver(e) { e.preventDefault(); document.getElementById('drop-zone').style.borderColor = 'var(--primary)'; }
-function onDragLeave() { document.getElementById('drop-zone').style.borderColor = 'var(--border)'; }
-function onDrop(e) { 
-  e.preventDefault(); 
-  onDragLeave();
-  const file = e.dataTransfer.files[0];
-  if (file) {
-    const input = document.getElementById('csv-input');
-    const dataTransfer = new DataTransfer();
-    dataTransfer.items.add(file);
-    input.files = dataTransfer.files;
-    importCSV(input);
-  }
-}
-
-// ══════════════════════════════════════════════════════
-// STARTUP
-// ══════════════════════════════════════════════════════
-window.onload = () => {
-  const s = getSettings();
-  if (s.isLoggedIn) {
-    document.getElementById('login-screen').style.display = 'none';
-    document.getElementById('main-app').style.display = 'block';
-    initApp();
-  } else {
-    initLoginScreen();
-  }
-};
+initLoginScreen();
 </script>
 </body>
 </html>
