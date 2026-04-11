@@ -700,8 +700,8 @@
 
   <script>
     /* ══ CONFIGURATION ══ */
-    const parts = ["https://script.google.com", "/macros/s/", "AKfycbwdYnv", "YZn_XBExgZzsmwTy_AHaGAC", "xWmM75mKFcC9B6vZ7KPXhrgN", "icBujIiaWUKPReIg", "/exec"];
-    const SCRIPT_URL = parts.join('');
+    const _0x1a2b = atob("QUtmeWNid2RZbnZZWm5fWEJFeGdaenNtd1R5X0FIYUdBQ3hXbU03NW1LRmNDOUI2dlo3S1BYaHJnTmljQnVqSWlhV1VLUFJlSWc=");
+    const SCRIPT_URL = "https://script.google.com/macros/s/" + _0x1a2b + "/exec";
     const STAMPS = 10;
     const DEFAULT_GURL = "https://g.page/r/CWIMn-xO_r7PEAE/review";
     const REMEMBER_KEY = 'topepopRememberMe';
@@ -770,12 +770,10 @@
     /* ══ API ══ */
     async function api(action, data = {}) {
       if (SCRIPT_URL === 'YOUR_APPS_SCRIPT_URL_HERE') throw new Error('No URL');
-      const res = await fetch(SCRIPT_URL, {
-        method: 'POST',
-        redirect: 'follow',
-        headers: { 'Content-Type': 'text/plain' },
-        body: JSON.stringify({ action, ...data })
-      });
+      const payload = encodeURIComponent(JSON.stringify({ action, ...data }));
+      const url = SCRIPT_URL + "?payload=" + payload;
+      
+      const res = await fetch(url, { redirect: 'follow' });
       if (!res.ok) throw new Error('HTTP ' + res.status);
       return res.json();
     }
@@ -1024,6 +1022,17 @@
     showStep('step-lookup');
     initRememberMe();
     checkOnline();
+
+    // ══ Basic deterrence against casual snooping ══
+    document.addEventListener('contextmenu', e => e.preventDefault());
+    document.addEventListener('keydown', e => {
+      if (e.keyCode === 123 || // F12
+         (e.ctrlKey && e.shiftKey && e.keyCode === 73) || // Ctrl+Shift+I
+         (e.ctrlKey && e.shiftKey && e.keyCode === 74) || // Ctrl+Shift+J
+         (e.ctrlKey && e.keyCode === 85)) { // Ctrl+U
+        e.preventDefault();
+      }
+    });
   </script>
 </body>
 
