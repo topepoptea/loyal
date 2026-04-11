@@ -950,7 +950,7 @@
       try {
         const r = await Promise.race([
           api('getMember', { phone }),
-          new Promise((_, rej) => setTimeout(() => rej(), 8000))
+          new Promise((_, rej) => setTimeout(() => rej(), 25000))
         ]);
         if (r.ok && r.member) {
           const list = cache.get();
@@ -1002,7 +1002,8 @@
       document.getElementById('reward-alert').style.display = m.pendingReward ? 'block' : 'none';
 
       // Generate QR Code
-      const qrTarget = "https://topepoptea.github.io/loyal/admin.html?scan=" + encodeURIComponent(cleanPhone(m.phone));
+      const qrPhone = String(m.phone || '').replace(/\D/g, '').slice(-9);
+      const qrTarget = "https://topepoptea.github.io/loyal/admin.html?scan=" + encodeURIComponent(qrPhone);
       const qrEl = document.getElementById('qrcode-display');
       qrEl.innerHTML = '';
       new QRCode(qrEl, {
@@ -1046,7 +1047,7 @@
         try {
           const r = await Promise.race([
             api('addMember', { member: newMember }),
-            new Promise((_, rej) => setTimeout(() => rej(), 8000))
+            new Promise((_, rej) => setTimeout(() => rej(), 25000))
           ]);
           if (r.ok) { isOnline = true; onlineChecked = true; setSyncStatus('online', 'Synced ✓'); }
         } catch (e) { setSyncStatus('offline', 'Saved locally — will sync later'); }
