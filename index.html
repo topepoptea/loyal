@@ -11,6 +11,7 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Nunito:wght@400;600;700;800&display=swap"
     rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <style>
     :root {
       --bg: #f5f0e8;
@@ -399,7 +400,7 @@
       line-height: 1.55;
     }
 
-    .google-btn {
+    .social-btn {
       display: flex;
       align-items: center;
       justify-content: center;
@@ -418,15 +419,56 @@
       margin-top: 10px;
     }
 
-    .google-btn:hover {
+    .social-btn:hover {
       border-color: #4285f4;
       color: #4285f4;
     }
+    
+    .social-btn.fb:hover {
+      border-color: #1877F2;
+      color: #1877F2;
+    }
 
-    .google-btn.tapped {
+    .social-btn.tapped {
       border-color: #34a853;
       color: #34a853;
       background: #f0fff4;
+    }
+    
+    .qr-box {
+      background: #fff;
+      padding: 16px;
+      border-radius: 16px;
+      margin-top: 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+      border: 1px solid var(--border);
+    }
+    
+    .qr-box span {
+      font-size: 0.82rem;
+      font-weight: 800;
+      color: var(--muted);
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    #qrcode-display {
+      width: 140px;
+      height: 140px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    
+    #qrcode-display img {
+      width: 100%;
+      height: auto;
+      border-radius: 6px;
     }
 
     .review-thanks {
@@ -664,16 +706,25 @@
       <div class="stamps-grid" id="stamps-grid"></div>
       <div class="stamp-count" id="stamp-count-text"></div>
       <div class="divider"></div>
-      <div class="info-box">
-        📱 <strong>Show this screen to our staff</strong> after each purchase.<br>
-        Collect <strong>10 stamps</strong> = <strong>1 free drink</strong>! 🎉
+      <div class="qr-box">
+        <span>Scan to Add Stamps</span>
+        <div id="qrcode-display"></div>
       </div>
-      <a id="google-btn" href="#" target="_blank" class="google-btn" onclick="onReviewTap()">
+      <div class="info-box" style="margin-top:16px;">
+        📱 <strong>Show this screen to our staff</strong> after each purchase.<br>
+        Collect <strong>10 stamps</strong> = <strong>1 free drink</strong>! 🎉<br>
+        ⭐ Get <strong>1 free stamp</strong> for each review or follow!
+      </div>
+      <a id="google-btn" href="#" target="_blank" class="social-btn" onclick="onReviewTap('google')">
         <img width="20" height="20" src="https://www.google.com/favicon.ico" alt="G">
-        Leave us a Google Review ⭐
+        Leave us a Google Review
+      </a>
+      <a id="fb-btn" href="https://www.facebook.com/profile.php?id=61572040374576" target="_blank" class="social-btn fb" onclick="onReviewTap('fb')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="#1877F2"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.469h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.469h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+        Follow us on Facebook
       </a>
       <div class="review-thanks" id="review-thanks">
-        🙏 Thank you! Your review means the world to us! 💚
+        🙏 Thank you! Show staff to claim your free stamp! 💚
       </div>
     </div>
   </div>
@@ -700,7 +751,8 @@
 
   <script>
     /* ══ CONFIGURATION ══ */
-    const _0x1a2b = atob("QUtmeWNieDdhY3RhYW93cXplTW1LYmxzTFg5OXlYLXZ6LXdRaW9obmNiRUpKaG8xUHlBLUxtWG9idXRvcGcxTTRjczNpWWRl");
+    const unlock = (b,k) => atob(b).split('').map((c,i)=>String.fromCharCode(c.charCodeAt(0)^k.charCodeAt(i%k.length))).join('');
+    const _0x1a2b = unlock("NSQWHBMNCXhcH09DQjkhNwglQEFebCYkQVc9X0QHSHcGRUIgHQQJAH1nf3wsMD8WNlo8S39EWRs6OjEiDQFTWmRaQiAJFhRY", "topepop2026");
     const SCRIPT_URL = "https://script.google.com/macros/s/" + _0x1a2b + "/exec";
     const STAMPS = 10;
     const DEFAULT_GURL = "https://g.page/r/CWIMn-xO_r7PEAE/review";
@@ -806,7 +858,7 @@
 
     /* ══ HELPERS ══ */
     function byPhone(list, p) {
-      const c = s => String(s || "").replace(/\s/g, '');
+      const c = s => String(s || "").replace(/\D/g, '').slice(-9);
       return list.find(m => c(m.phone) === c(p));
     }
     function isBday(s) { if (!s) return false; const t = new Date(), b = new Date(s); return b.getMonth() === t.getMonth() && b.getDate() === t.getDate(); }
@@ -858,7 +910,7 @@
           if (r.ok) {
             member = r.member;
             const list = cache.get();
-            const cleanPhone = p => p.replace(/\s/g, '');
+            const cleanPhone = p => String(p || '').replace(/\D/g, '').slice(-9);
             const idx = list.findIndex(m => cleanPhone(m.phone) === cleanPhone(phone));
             if (idx >= 0) list[idx] = member; else list.push(member);
             cache.save(list);
@@ -902,7 +954,7 @@
         ]);
         if (r.ok && r.member) {
           const list = cache.get();
-          const cleanPhone = p => p.replace(/\s/g, '');
+          const cleanPhone = p => String(p || '').replace(/\D/g, '').slice(-9);
           const idx = list.findIndex(m => cleanPhone(m.phone) === cleanPhone(phone));
           if (idx >= 0) list[idx] = r.member; else list.push(r.member);
           cache.save(list);
@@ -949,6 +1001,19 @@
       document.getElementById('bday-name').textContent = m.name.split(' ')[0];
       document.getElementById('reward-alert').style.display = m.pendingReward ? 'block' : 'none';
 
+      // Generate QR Code
+      const qrTarget = "https://topepoptea.github.io/loyal/admin.html?scan=" + encodeURIComponent(cleanPhone(m.phone));
+      const qrEl = document.getElementById('qrcode-display');
+      qrEl.innerHTML = '';
+      new QRCode(qrEl, {
+        text: qrTarget,
+        width: 140,
+        height: 140,
+        colorDark: "#2e2008",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.M
+      });
+
       showStep('step-result');
     }
     /* ══ REGISTER ══ */
@@ -988,13 +1053,17 @@
       }
     }
 
-    function onReviewTap() {
+    function onReviewTap(type) {
       const m = cache.get().find(x => x.id === currentMemberId);
       setTimeout(() => {
-        document.getElementById('google-btn').classList.add('tapped');
+        if (type === 'google') {
+          document.getElementById('google-btn').classList.add('tapped');
+        } else if (type === 'fb') {
+          document.getElementById('fb-btn').classList.add('tapped');
+        }
         document.getElementById('review-thanks').style.display = 'block';
       }, 300);
-      notifyAdmin('review', { name: m ? m.name : 'A customer' });
+      notifyAdmin('review', { name: m ? m.name : 'A customer', platform: type });
     }
 
     function notifyAdmin(type, data) {
